@@ -4,6 +4,8 @@ import MessageBlock from './MessageBlock';
 import SystemMap from './SystemMap';
 import withAuthorization from './withAuthorization';
 import {Grid,Panel,Row,Col} from 'react-bootstrap';
+import NodeList from './NodeList';
+import StatusBlock from './StatusBlock';
 
 class HomePage extends Component {
   render() {
@@ -13,6 +15,7 @@ class HomePage extends Component {
           <Col xs={12} md={4}>
             <Panel>
               <Panel.Heading>Nodes Online</Panel.Heading>
+              <Panel.Body><NodeList /></Panel.Body>
             </Panel>
           </Col>
           <Col xs={12} md={4}>
@@ -20,6 +23,14 @@ class HomePage extends Component {
               <Panel.Heading>Node Messages</Panel.Heading>
               <Panel.Body>
                 <MessageBlock />
+              </Panel.Body>
+            </Panel>
+          </Col>
+          <Col xs={12} md={4}>
+            <Panel>
+              <Panel.Heading>System Status</Panel.Heading>
+              <Panel.Body>
+                <StatusBlock />
               </Panel.Body>
             </Panel>
           </Col>

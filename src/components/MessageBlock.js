@@ -1,32 +1,59 @@
-
 import React, { Component } from 'react';
-//import logo from './logo.svg';
-import './App.css';
 import {firebase} from '../firebase/index';
 
 class MessageBlock extends Component {
 
-  constructor(props){
-      super(props);
-      this.messages=[];
-      this.state = {
-          messages: []
-      };
-  }
+    constructor(props){
+        super(props);
+        this.messages=[];
+        this.state = {
+            messages: []
+        };
+        this.removeMsgByKey.bind(this);
+    }
 
-  componentWillMount(){
-      let messageRef = firebase.db.ref('/messages').orderByKey().limitToLast(100);
-      messageRef.on('child_added', (snapshot) => {
-          console.log(snapshot.val());
-          let message = {text: snapshot.val().text, id: snapshot.key};
-          this.messages.push(message);
-          this.setState( {messages: this.messages } );
-      } );
-  }
+    removeMsgByKey(key){
+        let i,len = this.messages.length;
+        //console.log(this.messages);
+        for(i=0; i < len; i++){
+            if(this.messages[i].id === key){
+                this.messages.splice(i,1);
+            }
+        }
+    }
 
-  render() {
-    return (
-      <div>
+    updateMsgByKey(key,value){
+        let i,len = this.messages.length;
+        //console.log(this.messages);
+        for(i=0; i < len; i++){
+            if(this.messages[i].id === key){
+                this.messages[i].text = value;
+            }
+        }
+    }
+
+    componentWillMount(){
+        var messageRef = firebase.db.ref('/messages').orderByKey().limitToLast(100);
+        messageRef.on('child_added', (snapshot) => {
+            var msgVal = snapshot.val();                        
+            this.messages.push({text: msgVal.text, id: snapshot.key});
+            this.setState( {messages: this.messages } );
+        } );
+
+        messageRef.on('child_removed', (snapshot) => {
+            this.removeMsgByKey(snapshot.key);
+            this.setState( {messages: this.messages} );
+        });
+
+        messageRef.on('child_changed', (snapshot) => {            
+            this.updateMsgByKey(snapshot.key, snapshot.val().text);
+            this.setState({messages: this.messages});
+        });
+    }
+
+    render() {
+        return (
+        <div>
         <ul>
         {
             this.state.messages.map( (message) => (
@@ -35,8 +62,8 @@ class MessageBlock extends Component {
                     </li>))
         }
         </ul>
-      </div>
-    );
-  }
+        </div>
+        );
+    }
 }
 export default MessageBlock;
