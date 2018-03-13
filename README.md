@@ -1,6 +1,5 @@
-This is the web-based GUI for controlling the MZNT GNSS sensor network. This project was created with Create-React-App and runs on Google Firebase.
-
 ## Introduction
+This is the web-based GUI for controlling the MZNT GNSS sensor network. This project was created with Create-React-App and runs on Google Firebase.
 
 ## How It Works
 
