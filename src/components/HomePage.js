@@ -6,16 +6,23 @@ import withAuthorization from './withAuthorization';
 import {Grid,Panel,Row,Col} from 'react-bootstrap';
 import NodeList from './NodeList';
 import StatusBlock from './StatusBlock';
+import ControlBlock from './ControlBlock';
 
 class HomePage extends Component {
   render() {
     return (
       <Grid>
         <Row>
-          <Col xs={12} md={4}>
+          <Col xs={6} md={2}>
             <Panel>
               <Panel.Heading>Nodes Online</Panel.Heading>
               <Panel.Body><NodeList /></Panel.Body>
+            </Panel>
+          </Col>
+          <Col xs={6} md={2}>
+            <Panel>
+              <Panel.Heading>Experiment Control</Panel.Heading>
+              <Panel.Body><ControlBlock /></Panel.Body>
             </Panel>
           </Col>
           <Col xs={12} md={4}>
