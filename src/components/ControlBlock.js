@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import {firebase} from '../firebase/index';
 import {Button} from 'react-bootstrap';
 class ControlBlock extends Component {
 

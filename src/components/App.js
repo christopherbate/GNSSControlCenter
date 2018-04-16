@@ -13,6 +13,7 @@ import SignUpPage from './SignupPage';
 import LoginPage from './LoginPage';
 import HomePage from './HomePage';
 import * as routes from '../constants/routes';
+import NodeAGCPlots from './AGCPlot';
 
 import {Grid,Row,Col} from 'react-bootstrap';
 
@@ -49,7 +50,11 @@ const App = () => (
           />
           <Route
             exact path={routes.SIGN_UP}
-            compontnt={() => <SignUpPage />}
+            component={() => <SignUpPage />}
+          />
+          <Route
+            exact path={routes.AGC_PLOTS}
+            component={() => <NodeAGCPlots />}
           />
         </Col>
       </Row>
