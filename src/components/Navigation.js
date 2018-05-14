@@ -10,15 +10,14 @@ import {LinkContainer} from 'react-router-bootstrap';
 
 const AuthdLinks = () => (
   <Nav>
-    <LinkContainer to={routes.HOME} exact="true"><NavItem>Control Page</NavItem></LinkContainer>
-    <LinkContainer to={routes.AGC_PLOTS} exact="true"><NavItem>AGC Data</NavItem></LinkContainer>
-    <LinkContainer to={routes.SPEC_PLOTS}><NavItem>Spec. Plots</NavItem></LinkContainer>
+    <LinkContainer to={routes.HOME}><NavItem>Control Page</NavItem></LinkContainer>
+    <LinkContainer to={routes.HISTORY}><NavItem>History</NavItem></LinkContainer>
     <NavItem><LogoutButton /></NavItem>
   </Nav>
 );
 const NonAuthdLinks = () => (
   <Nav>
-      <LinkContainer to={routes.LANDING} exact="true"><NavItem>Landing</NavItem></LinkContainer>
+      <LinkContainer to={routes.LANDING}><NavItem>Landing</NavItem></LinkContainer>
       <LinkContainer to={routes.SIGN_UP}><NavItem>Signup</NavItem></LinkContainer>
       <LinkContainer to={routes.SIGN_IN}><NavItem>Login</NavItem></LinkContainer>
   </Nav>

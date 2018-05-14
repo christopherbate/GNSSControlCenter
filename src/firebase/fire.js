@@ -13,8 +13,10 @@ var fire = firebase.initializeApp(config);
 
 const auth = fire.auth();
 const db = fire.database();
+const storage = fire.storage();
 
 export {
     auth,
-    db
+    db,
+    storage
 };

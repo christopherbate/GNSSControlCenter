@@ -9,17 +9,6 @@ class MessageBlock extends Component {
         this.state = {
             messages: []
         };
-        this.removeMsgByKey.bind(this);
-    }
-
-    removeMsgByKey(key){
-        let i,len = this.messages.length;
-        //console.log(this.messages);
-        for(i=0; i < len; i++){
-            if(this.messages[i].id === key){
-                this.messages.splice(i,1);
-            }
-        }
     }
 
     updateMsgByKey(key,value){
@@ -39,11 +28,6 @@ class MessageBlock extends Component {
             this.messages.push({text: msgVal.text, id: snapshot.key});
             this.setState( {messages: this.messages } );
         } );
-
-        messageRef.on('child_removed', (snapshot) => {
-            this.removeMsgByKey(snapshot.key);
-            this.setState( {messages: this.messages} );
-        });
 
         messageRef.on('child_changed', (snapshot) => {            
             this.updateMsgByKey(snapshot.key, snapshot.val().text);

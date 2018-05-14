@@ -1,7 +1,7 @@
 import React from 'react';
 import * as routes from '../constants/routes';
 //import mapboxgl from 'mapbox-gl/dist/mapbox-gl';
-import ReactMapboxGl, {Layer, Feature} from 'react-mapbox-gl';
+import ReactMapboxGl, {Layer, Feature, Marker} from 'react-mapbox-gl';
 
 const Map = ReactMapboxGl({
     accessToken: routes.MAPBOX
@@ -31,13 +31,21 @@ class SystemMap extends React.Component {
                  width: "500"
             }}
             zoom={zoom}
-            center={[-105.2705, 40.0150]}>
+            center={[-105.035857,39.912612]}>
             <Layer
-            type="symbol"
-            id="marker"
-            layout={{ "icon-image": "marker-15" }}>
-            <Feature coordinates={[-105.2705, 40.0150]}/>
+            type="circle">
+
+            {
+                Object.keys(this.props.positions).map( (nodeName, index) => (
+                    <Feature key={index} coordinates={this.props.positions[nodeName]} />
+                ))
+            }
             </Layer>
+            {
+                Object.keys(this.props.positions).map( (nodeName, index) => (
+                    <Marker key={index} coordinates={this.props.positions[nodeName]}>{nodeName}</Marker>
+                ))
+            }
         </Map>
         );
     }

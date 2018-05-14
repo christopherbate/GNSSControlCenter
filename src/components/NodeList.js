@@ -6,9 +6,9 @@ class NodeList extends Component {
         <div>
             <ul>
             {
-                this.props.nodeList.map( (node) => (
-                        <li key={node.id}>
-                            {node.name} - {node.status}
+                Object.keys(this.props.nodeList).map( (name,i) => (
+                        <li key={i}>
+                            {name} - {this.props.nodeList[name].status}
                         </li>))
             }
             </ul>

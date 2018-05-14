@@ -1,30 +1,141 @@
 import React from 'react';
-import {Panel} from 'react-bootstrap';
-import withAuthorization from './withAuthorization';
-import {VictoryLine, VictoryChart,VictoryTheme} from 'victory';
+import { Grid, Panel, Row, Col, Image } from 'react-bootstrap';
+import { VictoryLine, VictoryChart, VictoryTheme, VictoryLegend, VictoryAxis } from 'victory';
+import { firebase} from '../firebase/index';
 
-const data = [
-    {quarter: 1, earnings: 10},
-    {quarter: 2, earnings: 10},
-    {quarter: 3, earnings: 7},
-    {quarter: 4, earnings: 7}
-  ];
+const reducer = (accumulator, currentValue) => ({ch1: accumulator.ch1 + currentValue.ch1});
+
+class AGCChart extends React.Component {
+    constructor(props) {
+        super(props);
+        this.data = [];
+        console.log(this.props.streamKey);
+        this.state = {
+            data: [],
+            agcAvg: 0
+        };
+        this.movingAvg = null;
+        this.refLocation = null;
+    }
+    componentWillMount() {
+        this.refLocation = '/agcdata/' + this.props.streamKey;
+        firebase.db.ref('/agcdata/' + this.props.streamKey).limitToLast(120).on('child_added', (snap) => {
+            this.data.push({
+                x: new Date(snap.key*1000), ch1: snap.val().ch0,
+                ch2: snap.val().ch1, ch3: snap.val().ch2,
+                ch4: snap.val().ch3
+            });
+            if(this.data.length > 120)
+            {
+                this.data = this.data.slice(1);
+            }
+            this.movingAvg = this.data.slice(-60).reduce(reducer);
+            if(this.movingAvg.ch1>0){
+                this.movingAvg.ch1 = this.movingAvg.ch1/60;
+            }
+            this.setState({ data: this.data, agcAvg: this.movingAvg });
+        });
+    }
+
+    componentWillUnmount() {
+        if (this.refLocation) {
+            firebase.db.ref(this.refLocation).off();
+        }
+    }
+    render() {
+        return (
+            <div>
+                <h3>L1 Moving Avg: {this.state.agcAvg.ch1}</h3>
+                <VictoryChart domainPadding={20} theme={VictoryTheme.material} scale={{x:"time"}}>
+                    <VictoryLegend x={0} y={0}
+                        orientation="horizontal"
+                        gutter={20}
+                        style={{ border: { stroke: "black" } }}
+                        data={[
+                            { name: "GPS L1", symbol: { fill: "#c43a31" } },
+                            { name: "GPS L2", symbol: { fill: "#fd9684" } },
+                            { name: "GLO L1", symbol: { fill: "#195fd6" } },
+                            { name: "GLO L2", symbol: { fill: "#1393e1" } }
+                        ]}
+                    />
+                    <VictoryLine style={{
+                        data: { stroke: "#c43a31" },
+                        parent: { border: "1px solid #ccc" }
+                    }} data={this.state.data} x="x" y="ch1" />
+                    <VictoryLine data={this.state.data} style={{
+                        data: { stroke: "#195fd6" },
+                        parent: { border: "1px solid #ccc" }
+                    }} x="x" y="ch2" />
+                    <VictoryLine data={this.state.data} style={{
+                        data: { stroke: "#1393e1" },
+                        parent: { border: "1px solid #ccc" }
+                    }} x="x" y="ch3" />
+                    <VictoryLine data={this.state.data} style={{
+                        data: { stroke: "#fd9684" },
+                        parent: { border: "1px solid #ccc" }
+                    }} x="x" y="ch4" />
+                </VictoryChart>
+            </div>
+        );
+    }
+}
+
+class SpecPlot extends React.Component 
+{
+    constructor(props){
+        super(props);
+        this.downloadURL = null
+        this.state = {
+            downloadUrl: null
+        };
+    }
+    componentWillMount(){
+        if(this.props.gsloc){
+            console.log("Downloading URL");
+            firebase.storage.ref(this.props.gsloc).getDownloadURL().then( (url) => {
+                this.downloadURL = url;
+                this.setState({downloadUrl: this.downloadURL});
+            });
+        }
+    }
+    render() {
+        return (
+            <Image src={this.state.downloadUrl} responsive />
+        );
+    }
+}
+
 
 class AGCPlot extends React.Component {
-    render(){
+    constructor(props) {
+        super(props);
+        this.downloadUrls = {};
+        this.state = { downloadUrls: {} };
+    }
+
+    render() {
         return (
-            <Panel>
-                <Panel.Heading>AGC Data</Panel.Heading>
-                <Panel.Body>
-                    <VictoryChart domainPadding={20} theme={VictoryTheme.material}>
-                        <VictoryLine data={data} x="quarter" y="earnings"/>
-                    </VictoryChart>
-                </Panel.Body>
-            </Panel>
+            <Grid>
+                <Row>
+                    {
+                        this.props.streamList ?
+                            Object.keys(this.props.streamList).map((nodeName, index) => (
+                                <Col md={6} xs={12} key={index}>
+                                    <Panel>
+                                        <Panel.Heading>AGC Data - {nodeName}</Panel.Heading>
+                                        <Panel.Body>
+                                            <AGCChart key={index} streamKey={this.props.streamList[nodeName]} />
+                                            { this.props.specPlots[nodeName] ? (<SpecPlot gsloc={this.props.specPlots[nodeName]}/>) : (null)}
+                                        </Panel.Body>
+                                    </Panel>
+                                </Col>
+                            )) : null
+                    }
+                </Row>
+            </Grid>
         );
     }
 };
 
-const authCondition = (authUser) => !!authUser;
-
-export default withAuthorization(authCondition)(AGCPlot);
+export default AGCPlot;
+export {AGCChart};

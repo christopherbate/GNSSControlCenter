@@ -13,10 +13,9 @@ import SignUpPage from './SignupPage';
 import LoginPage from './LoginPage';
 import HomePage from './HomePage';
 import * as routes from '../constants/routes';
-import NodeAGCPlots from './AGCPlot';
-
+import ExpHistory from './ExpHistory';
 import {Grid,Row,Col} from 'react-bootstrap';
-
+import ExpDetail from './ExpDetail';
 
 // Higher Order Components
 import withAuthentication from './withAuthentication';
@@ -53,8 +52,12 @@ const App = () => (
             component={() => <SignUpPage />}
           />
           <Route
-            exact path={routes.AGC_PLOTS}
-            component={() => <NodeAGCPlots />}
+            exact path={routes.HISTORY}
+            component={() => <ExpHistory />}
+          />
+          <Route
+            path={routes.HISTORY_DETAIL}
+            render={ (props) => <ExpDetail {...props} />}
           />
         </Col>
       </Row>
