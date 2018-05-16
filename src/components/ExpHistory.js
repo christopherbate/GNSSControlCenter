@@ -9,9 +9,7 @@ class ExpHistory extends React.Component {;
     constructor(props)
     {
         super(props);
-
         this.expList = {};
-
         this.state = {
             expList: {}
         };

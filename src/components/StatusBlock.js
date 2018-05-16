@@ -29,7 +29,6 @@ class StatusBlock extends Component {
         return (
         <div>
            <p>System Status: {this.state.info.status}</p>
-           <p>Nodes Online: {this.state.info.nodes}</p>
         </div>
         );
     }

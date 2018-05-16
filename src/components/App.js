@@ -1,12 +1,7 @@
-// react
 import React from 'react';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { Grid, Row, Col } from 'react-bootstrap';
 
-// Style imports
-
-// Routing
-import {BrowserRouter as Router,Route} from 'react-router-dom';
-
-// Sub components
 import Navigation from './Navigation';
 import LandingPage from './LandingPage';
 import SignUpPage from './SignupPage';
@@ -14,10 +9,7 @@ import LoginPage from './LoginPage';
 import HomePage from './HomePage';
 import * as routes from '../constants/routes';
 import ExpHistory from './ExpHistory';
-import {Grid,Row,Col} from 'react-bootstrap';
 import ExpDetail from './ExpDetail';
-
-// Higher Order Components
 import withAuthentication from './withAuthentication';
 
 const App = () => (
@@ -28,7 +20,7 @@ const App = () => (
           <Navigation />
         </Col>
       </Row>
-      <hr/>
+      <hr />
       <Row>
         <Col xs={12} md={12}>
           <Route
@@ -57,7 +49,7 @@ const App = () => (
           />
           <Route
             path={routes.HISTORY_DETAIL}
-            render={ (props) => <ExpDetail {...props} />}
+            render={(props) => <ExpDetail {...props} />}
           />
         </Col>
       </Row>

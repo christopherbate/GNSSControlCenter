@@ -1,9 +1,9 @@
 import React from 'react';
 import { Grid, Panel, Row, Col, Image } from 'react-bootstrap';
 import { VictoryLine, VictoryChart, VictoryTheme, VictoryLegend, VictoryAxis } from 'victory';
-import { firebase} from '../firebase/index';
+import { firebase } from '../firebase/index';
 
-const reducer = (accumulator, currentValue) => ({ch1: accumulator.ch1 + currentValue.ch1});
+const reducer = (accumulator, currentValue) => ({ ch1: accumulator.ch1 + currentValue.ch1 });
 
 class AGCChart extends React.Component {
     constructor(props) {
@@ -21,17 +21,16 @@ class AGCChart extends React.Component {
         this.refLocation = '/agcdata/' + this.props.streamKey;
         firebase.db.ref('/agcdata/' + this.props.streamKey).limitToLast(120).on('child_added', (snap) => {
             this.data.push({
-                x: new Date(snap.key*1000), ch1: snap.val().ch0,
+                x: new Date(snap.key * 1000), ch1: snap.val().ch0,
                 ch2: snap.val().ch1, ch3: snap.val().ch2,
                 ch4: snap.val().ch3
             });
-            if(this.data.length > 120)
-            {
+            if (this.data.length > 120) {
                 this.data = this.data.slice(1);
             }
             this.movingAvg = this.data.slice(-60).reduce(reducer);
-            if(this.movingAvg.ch1>0){
-                this.movingAvg.ch1 = this.movingAvg.ch1/60;
+            if (this.movingAvg.ch1 > 0) {
+                this.movingAvg.ch1 = this.movingAvg.ch1 / 60;
             }
             this.setState({ data: this.data, agcAvg: this.movingAvg });
         });
@@ -46,7 +45,7 @@ class AGCChart extends React.Component {
         return (
             <div>
                 <h3>L1 Moving Avg: {this.state.agcAvg.ch1}</h3>
-                <VictoryChart domainPadding={20} theme={VictoryTheme.material} scale={{x:"time"}}>
+                <VictoryChart domainPadding={20} theme={VictoryTheme.material} scale={{ x: "time" }}>
                     <VictoryLegend x={0} y={0}
                         orientation="horizontal"
                         gutter={20}
@@ -80,21 +79,20 @@ class AGCChart extends React.Component {
     }
 }
 
-class SpecPlot extends React.Component 
-{
-    constructor(props){
+class SpecPlot extends React.Component {
+    constructor(props) {
         super(props);
         this.downloadURL = null
         this.state = {
             downloadUrl: null
         };
     }
-    componentWillMount(){
-        if(this.props.gsloc){
+    componentWillMount() {
+        if (this.props.gsloc) {
             console.log("Downloading URL");
-            firebase.storage.ref(this.props.gsloc).getDownloadURL().then( (url) => {
+            firebase.storage.ref(this.props.gsloc).getDownloadURL().then((url) => {
                 this.downloadURL = url;
-                this.setState({downloadUrl: this.downloadURL});
+                this.setState({ downloadUrl: this.downloadURL });
             });
         }
     }
@@ -106,7 +104,7 @@ class SpecPlot extends React.Component
 }
 
 
-class AGCPlot extends React.Component {
+class AGCPlots extends React.Component {
     constructor(props) {
         super(props);
         this.downloadUrls = {};
@@ -118,14 +116,22 @@ class AGCPlot extends React.Component {
             <Grid>
                 <Row>
                     {
-                        this.props.streamList ?
-                            Object.keys(this.props.streamList).map((nodeName, index) => (
+                        this.props.nodeList ?
+                            Object.keys(this.props.nodeList).map((nodeName, index) => (
                                 <Col md={6} xs={12} key={index}>
                                     <Panel>
                                         <Panel.Heading>AGC Data - {nodeName}</Panel.Heading>
                                         <Panel.Body>
-                                            <AGCChart key={index} streamKey={this.props.streamList[nodeName]} />
-                                            { this.props.specPlots[nodeName] ? (<SpecPlot gsloc={this.props.specPlots[nodeName]}/>) : (null)}
+                                            { 
+                                                this.props.nodeList[nodeName].streamKey ? 
+                                                ( <AGCChart key={index} streamKey={this.props.nodeList[nodeName].streamKey} /> ) 
+                                                : (null)  
+                                            }                                            
+                                            { 
+                                                this.props.nodeList[nodeName].specKey ? 
+                                                ( <SpecPlot gsloc={this.props.nodeList[nodeName].specKey} />) : 
+                                                (null)
+                                            }
                                         </Panel.Body>
                                     </Panel>
                                 </Col>
@@ -137,5 +143,5 @@ class AGCPlot extends React.Component {
     }
 };
 
-export default AGCPlot;
-export {AGCChart};
+export default AGCPlots;
+export { AGCChart };

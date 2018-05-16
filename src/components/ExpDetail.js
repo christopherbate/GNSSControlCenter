@@ -1,17 +1,15 @@
 import React, {Component} from 'react';
 import {firebase} from '../firebase/index';
-import {Grid,Row,Col,Panel} from 'react-bootstrap';
-import AGCPlot from './AGCPlot';
+import {Grid,Row,Panel} from 'react-bootstrap';
+import AGCPlots from './AGCPlot';
 
 class ExpDetail extends Component 
 {
     constructor(props){
         super(props);
-        this.agcPlots = {}
-        this.intList = {}
+        this.nodeList = {}
         this.state = {
-            agcPlots: {},
-            specPlots: {},
+            nodeList: {},            
             expName: "",
             intList: {}
         };
@@ -19,9 +17,11 @@ class ExpDetail extends Component
     componentWillMount(){   
         firebase.db.ref("expinfo/" + this.props.match.params.id +"/agcplots").once('value', (snapshot) => {
             snapshot.forEach( (nodeSnap) => {
-                this.agcPlots[nodeSnap.key] = nodeSnap.val();
+                this.nodeList[nodeSnap.key] = {
+                    'streamKey': nodeSnap.val()
+                };
             });
-            this.setState({agcPlots: this.agcPlots});
+            this.setState({nodeList: this.nodeList});
         });
         firebase.db.ref("expinfo/"+this.props.match.params.id+"/expname").once('value',(snapshot)=>{
             this.setState({expName:snapshot.val()});
@@ -47,12 +47,12 @@ class ExpDetail extends Component
                                 Experiment Info
                             </Panel.Heading>
                             <Panel.Body>
-                                <h3>Name: {this.state.expName}</h3>
+                                <h3>Name: {this.state.expName}</h3>                                
                             </Panel.Body>
                         </Panel>
                     </Row>
                     <Row>
-                       <AGCPlot streamList={this.state.agcPlots} specPlots={this.state.specPlots}/>
+                       <AGCPlots nodeList={this.state.nodeList} />
                     </Row>
                     <Row>
                         <Panel>

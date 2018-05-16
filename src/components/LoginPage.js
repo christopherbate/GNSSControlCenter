@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
-import {auth} from '../firebase/index';
+import { auth } from '../firebase/index';
 import * as routes from '../constants/routes';
-import {withRouter} from 'react-router-dom';
-import './App.css';
-import {FormGroup,Grid,Col,Row,FormControl,Form, Button} from 'react-bootstrap';
+import { withRouter } from 'react-router-dom';
+import { FormGroup, Grid, Col, Row, FormControl, Form, Button } from 'react-bootstrap';
 
 
 class LoginPage extends React.Component {
@@ -12,13 +11,13 @@ class LoginPage extends React.Component {
       <Grid>
         <Row>
           <Col xs={12}>
-          <h1>Login</h1>
+            <h1>Login</h1>
           </Col>
         </Row>
         <hr />
         <Row>
           <Col xs={12}>
-          <LoginForm history={this.props.history} />       
+            <LoginForm history={this.props.history} />
           </Col>
         </Row>
       </Grid>
@@ -27,7 +26,7 @@ class LoginPage extends React.Component {
 }
 
 class LoginForm extends Component {
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = {
       username: '',
@@ -36,7 +35,7 @@ class LoginForm extends Component {
       error: null
     };
   }
-  onSubmit= (event) => {
+  onSubmit = (event) => {
     auth.fbLogin(this.state.email, this.state.password).then(
       () => {
         this.setState({
@@ -47,13 +46,13 @@ class LoginForm extends Component {
         });
         this.props.history.push(routes.HOME);
       }
-    ).catch( error => {
-      this.setState({'error': error});
+    ).catch(error => {
+      this.setState({ 'error': error });
     });
 
     event.preventDefault();
   }
-  render(){
+  render() {
     const isInvalid = this.state.passwoord === '' || this.state.email === '';
     return (
       <div>
@@ -64,8 +63,8 @@ class LoginForm extends Component {
             </Col>
             <Col sm={10}>
               <FormControl
-                value = {this.state.email}
-                onChange={event => this.setState({'email':event.target.value})}
+                value={this.state.email}
+                onChange={event => this.setState({ 'email': event.target.value })}
                 type="text"
                 placeholder="Email"
               />
@@ -78,8 +77,8 @@ class LoginForm extends Component {
             </Col>
             <Col sm={10}>
               <FormControl
-                value = {this.state.password}
-                onChange={event => this.setState({password: event.target.value})}
+                value={this.state.password}
+                onChange={event => this.setState({ password: event.target.value })}
                 type="password"
                 placeholder="Password"
               />
@@ -87,13 +86,13 @@ class LoginForm extends Component {
           </FormGroup>
           <FormGroup>
             <Col sm={12}>
-            <Button bsStyle="primary" type="submit" disabled={isInvalid}>
-              Login
+              <Button bsStyle="primary" type="submit" disabled={isInvalid}>
+                Login
             </Button>
             </Col>
           </ FormGroup>
-        </Form>    
-        { this.state.error && <p>{this.state.error.message}</p>}
+        </Form>
+        {this.state.error && <p>{this.state.error.message}</p>}
       </div>
     );
   }

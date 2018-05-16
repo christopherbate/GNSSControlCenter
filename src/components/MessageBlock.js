@@ -1,52 +1,45 @@
 import React, { Component } from 'react';
-import {firebase} from '../firebase/index';
+import { firebase } from '../firebase/index';
 
 class MessageBlock extends Component {
 
-    constructor(props){
+    constructor(props) {
         super(props);
-        this.messages=[];
+        this.messages = {};
         this.state = {
-            messages: []
+            messages: this.messages
         };
     }
 
-    updateMsgByKey(key,value){
-        let i,len = this.messages.length;
-        //console.log(this.messages);
-        for(i=0; i < len; i++){
-            if(this.messages[i].id === key){
-                this.messages[i].text = value;
-            }
-        }
-    }
-
-    componentWillMount(){
+    componentWillMount() {
         var messageRef = firebase.db.ref('/messages').orderByKey().limitToLast(100);
         messageRef.on('child_added', (snapshot) => {
-            var msgVal = snapshot.val();                        
-            this.messages.push({text: msgVal.text, id: snapshot.key});
-            this.setState( {messages: this.messages } );
-        } );
+            this.messages[snapshot.key] = snapshot.val();
+            this.setState({ messages: this.messages });
+            return true;
+        });
 
-        messageRef.on('child_changed', (snapshot) => {            
-            this.updateMsgByKey(snapshot.key, snapshot.val().text);
-            this.setState({messages: this.messages});
+        messageRef.on('child_removed', (snapshot) => {
+            if (snapshot.key !== null) {
+                delete this.messages[snapshot.key];
+            }
+            this.setState({ messages: this.messages });
+            return true;
         });
     }
 
     render() {
         return (
-        <div>
-        <ul>
-        {
-            this.state.messages.map( (message) => (
-                    <li key={message.id}>
-                        {message.text}
-                    </li>))
-        }
-        </ul>
-        </div>
+            <div>
+                <ul>
+                    {
+                        Object.keys(this.state.messages).map((key, index) => (
+                            <li key={index}>
+                                {this.state.messages[key].text}
+                            </li>))
+                    }
+                </ul>
+            </div>
         );
     }
 }

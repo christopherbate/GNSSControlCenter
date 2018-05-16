@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import "./App.css"
 import * as routes from '../constants/routes';
 import LogoutButton from './Logout';
 

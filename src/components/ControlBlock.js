@@ -11,12 +11,6 @@ class ControlBlock extends Component {
             buttonPressed: null,
             showExpSetup: false,
             showEphModal: false,
-            ephButtonActive: false,
-            startExpButtonActive: false,
-            updateButtonActive: false,
-            specButtonActive: false,
-            stopExpButtonActive: false,
-            jamButtonActive: false,
             ephNodeName: "mz0",
             agcThresh: 0,
             agcThreshChange: 0,
@@ -27,61 +21,8 @@ class ControlBlock extends Component {
     }
 
     componentWillMount(){
-        firebase.db.ref("/buttons/ephButton").on("value", (snap) => {
-            if(snap.val() === "off"){
-                this.setState({ephButtonActive: false});
-            } else if(snap.val() === "on"){
-                this.setState({ephButtonActive:true});
-            }
-        });
-
-        firebase.db.ref("/buttons/startExpButton").on("value", (snap) => {
-            if(snap.val() === "off"){
-                this.setState({startExpButtonActive: false});
-            } else if(snap.val() === "on"){
-                this.setState({startExpButtonActive:true});
-            }
-        });
-
-        firebase.db.ref("/buttons/updateButton").on("value", (snap) => {
-            if(snap.val() === "off"){
-                this.setState({updateButtonActive: false});
-            } else if(snap.val() === "on"){
-                this.setState({updateButtonActive:true});
-            }
-        });
-
-        firebase.db.ref("/buttons/specButton").on("value", (snap) => {
-            if(snap.val() === "off"){
-                this.setState({specButtonActive: false});
-            } else if(snap.val() === "on"){
-                this.setState({specButtonActive:true});
-            }
-        });
-
-        firebase.db.ref("/buttons/jamButton").on("value", (snap) => {
-            if(snap.val() === "off"){
-                this.setState({jamButtonActive: false});
-            } else if(snap.val() === "on"){
-                this.setState({jamButtonActive:true});
-            }
-        });
-
-        firebase.db.ref("/buttons/stopExpButton").on("value", (snap)=>{
-            if(snap.val() === "off"){
-                this.setState({stopExpButtonActive: false});
-            } else if(snap.val() === "on"){
-                this.setState({stopExpButtonActive:true});
-            }
-        })
-
-        firebase.db.ref("/settings/agcThresh").on("value", (snap) => {
-            this.setState({agcThresh: snap.val()});
-        });
-
-        firebase.db.ref("/settings/nomAGC").on("value", snap => {
-            this.setState({nominalAGC: snap.val()});
-        })
+        firebase.db.ref("/settings/agcThresh").on("value", (snap) => ( this.setState({agcThresh: snap.val()}) ));
+        firebase.db.ref("/settings/nomAGC").on("value", snap => ( this.setState({nominalAGC: snap.val()}) ));
     }
 
     onClickUpdate(e) {
@@ -115,87 +56,118 @@ class ControlBlock extends Component {
         this.setState( {showExpSetup:true} );
     }
     onClickStopExp(e) {
-        console.log("Requesting stop exp.");
-        var ts = Math.round((new Date()).getTime()/1000);
-        firebase.db.ref("/command").update({
-            'stopexp': ts
+        // Change the state and the experiment key.
+        firebase.db.ref('state').update({
+            'status':'SETUP',
+            'expkey': null
+        });
+
+        // Clear the individual node plot data.
+        Object.keys(this.props.nodeList).map( (nodeName,index) =>{
+            firebase.db.ref('state/nodes/'+nodeName).update({
+                'streamKey': null,
+                'specKey': null
+            });
+            return true;
         });
     }
     onClickExpModalStart(e){
+        // This is for starting experiment.
+        // Hide the modal.
         this.setState( {showExpSetup: false});
-        console.log("Requesting exp start");
+        
+        // Create new time.
         var ts = Math.round((new Date()).getTime()/1000);
-        firebase.db.ref("/command").update({
-            'startexp': ts,
-            'expname': this.state.expSetupName
+
+        // Create new plots for each of the nodes.
+        var agcPlots = {};
+        var expRef = firebase.db.ref('/expinfo/').push();
+        Object.keys(this.props.nodeList).map( (nodeName,index) =>{
+            // Add a new agc plot
+            if(this.props.nodeList[nodeName].status === 'online'){
+                var agcStream = firebase.db.ref('/agcdata').push();
+                agcPlots[nodeName] = agcStream.key;    
+                firebase.db.ref('state/nodes/'+nodeName).update({
+                    'streamKey': agcStream.key
+                });         
+            }   
+            return true;
+        });
+
+        // Tell the nodes to start logging.
+        firebase.db.ref('/command').update({
+            'startexp': this.state.expSetupName
+        });
+
+        // Update the new experiment ref.
+        expRef.update({
+            'agcplots': agcPlots,
+            'expname': this.state.expSetupName,
+            'start_time': ts
+        });       
+
+        // Update the current experiment.
+        firebase.db.ref('/state').update({
+            'expkey': expRef.key,
+            'status': 'STARTED'            
         });
     }
 
-    onClickHaltAll(e){
-        console.log("Requesting halt all");
-        var ts = Math.round((new Date()).getTime()/1000);
+    //---------------- CONTROL COMMANDS ------------------------------------
+    onClickRebootAll(e){        
         firebase.db.ref("/command").update({
-            'haltall': ts
+            'rebootall': new Date()
         });
     }
-
+    onClickHaltAll(e) {
+        firebase.db.ref("/command").update({
+            'haltall': new Date()
+        });
+    }
     onClickSpec(e){
-        var ts = Math.round((new Date()).getTime()/1000);
+        // Change the state.
+        firebase.db.ref('/state').update({
+            status: "SPECREQUESTED"
+        });
+        // Tell the server we requested a spec.
         firebase.db.ref("/command").update({
-            'getspec': ts
+            'getspec': new Date()
         });
     }
 
+    //-------------------- FORM CHANGE HANDLING ---------------------------
     onRadioChange(event){
         console.log(event.target.value);
         this.setState({ephNodeName:event.target.value});
     }
-
     handleChangeAGCT(event){
         this.setState({ agcThreshChange: event.target.value });
     }
-
     handleChangeAGCNom(event){
         this.setState({ nominalAGCChange: event.target.value });
     }
-
     handleExpSetupName(event){
         this.setState({expSetupName: event.target.value});
     }
-
     onUpdateAGCT(event){
         if(!isNaN(this.state.agcThreshChange)){
             firebase.db.ref("/settings").update({
                 'agcThresh': this.state.agcThreshChange
             });
-        }
-        else
-        {
+        } else {
             console.log("AGC Threshold not a number.");
         }
     }
-
     onUpdateAGCN(event){
         if(!isNaN(this.state.nominalAGCChange)){
             firebase.db.ref("/settings").update({
                 'nomAGC': this.state.nominalAGCChange
             });
-        }
-        else
-        {
+        } else {
             console.log("AGC Threshold not a number.");
         }
     }
-
-    onClickAddPos(e){
-        console.log("Position: ");
-        this.getLocationPos();
-    }
-
-    onClickAddJammer(e){
-        console.log("Jammer: ");
-        this.addLocationJam();
-    }
+    //-----------------------------------------------------------------------
 
     getLocationPos() {
         if (navigator.geolocation) {
@@ -246,12 +218,11 @@ class ControlBlock extends Component {
             <Grid fluid={true}>
                 <Row>
                     <Col xs={6}>
-                        <Button bsStyle="primary" onClick={this.onClickUpdate.bind(this)} disabled={!this.state.updateButtonActive} >Get Assisted Position Update</Button>
-                        <Button bsStyle="primary" onClick={this.onClickEphemeris.bind(this)} disabled={!this.state.ephButtonActive}>Get Ephemeris Update</Button>
-                        <Button bsStyle="primary" onClick={this.onClickStartExp.bind(this)} disabled={!this.state.startExpButtonActive}>Start Experiment</Button>
-                        <Button bsStyle="primary" onClick={this.onClickStopExp.bind(this)} disabled={!this.state.stopExpButtonActive}>Stop Experiment</Button>
-                        <Button bsStyle="primary" onClick={this.onClickSpec.bind(this)} disabled={!this.state.specButtonActive}>Get Spectrum Plots</Button>
-                        <Button bsStyle="danger" onClick={this.onClickHaltAll.bind(this)}>Remote Reboot Nodes</Button>                        
+                        <Button bsStyle="primary" onClick={this.onClickUpdate.bind(this)} disabled={!(this.props.controlState==="ARMED")} >Get Assisted Position Update</Button>
+                        <Button bsStyle="primary" onClick={this.onClickEphemeris.bind(this)} disabled={!(this.props.controlState==="ARMED"||this.props.controlState==="SETUP")}>Get Ephemeris Update</Button>
+                        <Button bsStyle="primary" onClick={this.onClickStartExp.bind(this)} disabled={!(this.props.controlState==="SETUP")}>Start Experiment</Button>
+                        <Button bsStyle="primary" onClick={this.onClickStopExp.bind(this)} disabled={!(this.props.controlState==="ARMED"||this.props.controlState==="STARTED")}>Stop Experiment</Button>
+                        <Button bsStyle="primary" onClick={this.onClickSpec.bind(this)} disabled={!(this.props.controlState==="ARMED"||this.props.controlState==="STARTED")}>Get Spectrum Plots</Button>                                             
                     </Col>
                     <Col xs={6}>
                         <Form>
@@ -268,11 +239,16 @@ class ControlBlock extends Component {
                         </Form>
                     </Col>
                     <Col xs={6}>
-                        <Button bsStyle="primary" onClick={this.onClickAddPos.bind(this)}>GetPosition</Button>
-                        <Button bsStyle="primary" disabled={!this.state.jamButtonActive} onClick={this.onClickAddJammer.bind(this)}>Mark Jammer</Button>
+                        <Button bsStyle="primary" onClick={this.getLocationPos.bind(this)}>GetPosition</Button>
+                        <Button bsStyle="primary" disabled={!this.state.jamButtonActive} onClick={this.addLocationJam.bind(this)}>Mark Jammer</Button>
+                    </Col>
+                    <Col xs={6}>
+                        <Button bsStyle="danger" onClick={this.onClickRebootAll.bind(this)}>Remote Reboot Nodes</Button>
+                        <Button bsStyle="danger" onClick={this.onClickHaltAll.bind(this)}> Halt all </Button>
                     </Col>
                 </Row>
             </Grid>
+
             <Modal show={this.state.showEphModal} onHide={this.onClickHideEphModal.bind(this)}>
                 <Modal.Header closeButton>
                 </Modal.Header>
@@ -292,6 +268,7 @@ class ControlBlock extends Component {
                     </form>
                 </Modal.Body>
             </Modal>
+
             <Modal show={this.state.showExpSetup} onHide={this.onClickHideExpSetup.bind(this)}>
                 <Modal.Header closeButton>Experiment Setup</Modal.Header>
                 <Modal.Body>

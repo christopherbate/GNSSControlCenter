@@ -9,20 +9,11 @@ const Map = ReactMapboxGl({
 
 const zoom=[12];
 
-//mapboxgl.accessToken = routes.MAPBOX;
-
-
 class SystemMap extends React.Component {
-    componentDidMount(){
-        /*const map = new mapboxgl.Map( 
-            { container: this.mapContainer, 
-            style: 'mapbox://styles/mapbox/satellite-streets-v10'}
-        );*/
-    }
 
     render() {
         const map_style = "mapbox://styles/mapbox/streets-v9";
-        //return <div style={style} ref={el => this.mapContainer = el} />;
+        
         return( 
         <Map
             style={map_style}
@@ -36,14 +27,14 @@ class SystemMap extends React.Component {
             type="circle">
 
             {
-                Object.keys(this.props.positions).map( (nodeName, index) => (
-                    <Feature key={index} coordinates={this.props.positions[nodeName]} />
+                Object.keys(this.props.nodeList).map( (nodeName, index) => (
+                    <Feature key={index} coordinates={this.props.nodeList[nodeName].position ? this.props.nodeList[nodeName].position : { lng: 0, lat: 0 }} />
                 ))
             }
             </Layer>
             {
-                Object.keys(this.props.positions).map( (nodeName, index) => (
-                    <Marker key={index} coordinates={this.props.positions[nodeName]}>{nodeName}</Marker>
+                Object.keys(this.props.nodeList).map( (nodeName, index) => (
+                    <Marker key={index} coordinates={this.props.nodeList[nodeName].position ? this.props.nodeList[nodeName].position : {lng: 0, lat: 0}}>{nodeName}</Marker>
                 ))
             }
         </Map>
