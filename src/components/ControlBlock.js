@@ -66,7 +66,8 @@ class ControlBlock extends Component {
         Object.keys(this.props.nodeList).map( (nodeName,index) =>{
             firebase.db.ref('state/nodes/'+nodeName).update({
                 'streamKey': null,
-                'specKey': null
+                'specKey': null,
+                'errcnt': 0
             });
             return true;
         });
@@ -79,11 +80,11 @@ class ControlBlock extends Component {
         // Create new time.
         var ts = Math.round((new Date()).getTime()/1000);
 
-        // Create new plots for each of the nodes.
+        // Create a new experiment entry and new plots for each of the nodes.
         var agcPlots = {};
         var expRef = firebase.db.ref('/expinfo/').push();
         Object.keys(this.props.nodeList).map( (nodeName,index) =>{
-            // Add a new agc plot
+            // Add a new agc plot to each MZNT node that is online.
             if(this.props.nodeList[nodeName].status === 'online'){
                 var agcStream = firebase.db.ref('/agcdata').push();
                 agcPlots[nodeName] = agcStream.key;    

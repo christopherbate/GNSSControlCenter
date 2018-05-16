@@ -10,6 +10,7 @@ import HomePage from './HomePage';
 import * as routes from '../constants/routes';
 import ExpHistory from './ExpHistory';
 import ExpDetail from './ExpDetail';
+import Localize from './Localization';
 import withAuthentication from './withAuthentication';
 
 const App = () => (
@@ -46,6 +47,10 @@ const App = () => (
           <Route
             exact path={routes.HISTORY}
             component={() => <ExpHistory />}
+          />
+          <Route 
+            exact path={routes.LOCALIZE}
+            component={() => <Localize />}
           />
           <Route
             path={routes.HISTORY_DETAIL}

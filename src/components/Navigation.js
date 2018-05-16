@@ -11,6 +11,7 @@ const AuthdLinks = () => (
   <Nav>
     <LinkContainer to={routes.HOME}><NavItem>Control Page</NavItem></LinkContainer>
     <LinkContainer to={routes.HISTORY}><NavItem>History</NavItem></LinkContainer>
+    <LinkContainer to={routes.LOCALIZE}><NavItem>Localize</NavItem></LinkContainer>
     <NavItem><LogoutButton /></NavItem>
   </Nav>
 );

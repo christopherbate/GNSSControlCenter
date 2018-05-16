@@ -19,7 +19,7 @@ class AGCChart extends React.Component {
     }
     componentWillMount() {
         this.refLocation = '/agcdata/' + this.props.streamKey;
-        firebase.db.ref('/agcdata/' + this.props.streamKey).limitToLast(120).on('child_added', (snap) => {
+        firebase.db.ref('/agcdata/' + this.props.streamKey).limitToLast(60).on('child_added', (snap) => {
             this.data.push({
                 x: new Date(snap.key * 1000), ch1: snap.val().ch0,
                 ch2: snap.val().ch1, ch3: snap.val().ch2,
@@ -131,7 +131,7 @@ class AGCPlots extends React.Component {
                                                 this.props.nodeList[nodeName].specKey ? 
                                                 ( <SpecPlot gsloc={this.props.nodeList[nodeName].specKey} />) : 
                                                 (null)
-                                            }
+                                            }                                                                                                                                
                                         </Panel.Body>
                                     </Panel>
                                 </Col>
