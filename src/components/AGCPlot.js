@@ -14,25 +14,34 @@ class AGCChart extends React.Component {
             data: [],
             agcAvg: 0
         };
-        this.movingAvg = null;
+        this.movingAvg = {
+            ch1: 0,
+            ch2: 0,
+            ch3: 0,
+            ch4: 0
+        };
         this.refLocation = null;
     }
     componentWillMount() {
         this.refLocation = '/agcdata/' + this.props.streamKey;
         firebase.db.ref('/agcdata/' + this.props.streamKey).limitToLast(60).on('child_added', (snap) => {
             this.data.push({
-                x: new Date(snap.key * 1000), ch1: snap.val().ch0,
-                ch2: snap.val().ch1, ch3: snap.val().ch2,
+                x: new Date(snap.key * 1000), 
+                ch1: snap.val().ch0,
+                ch2: snap.val().ch1, 
+                ch3: snap.val().ch2,
                 ch4: snap.val().ch3
             });
             if (this.data.length > 120) {
                 this.data = this.data.slice(1);
             }
-            this.movingAvg = this.data.slice(-60).reduce(reducer);
-            if (this.movingAvg.ch1 > 0) {
-                this.movingAvg.ch1 = this.movingAvg.ch1 / 60;
+            if(this.data.length>0){
+                this.movingAvg = this.data.reduce(reducer);
+                this.movingAvg.ch1 = this.movingAvg.ch1 / this.data.length;
+            } else {
+                this.movingAvg = this.data.reduce(reducer, 0);
             }
-            this.setState({ data: this.data, agcAvg: this.movingAvg });
+            this.setState({data: this.data, agcAvg: this.movingAvg });
         });
     }
 

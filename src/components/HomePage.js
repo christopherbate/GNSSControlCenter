@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Grid, Panel, Row, Col } from 'react-bootstrap';
+import { Grid, Panel, Row, Col, Button } from 'react-bootstrap';
 import { firebase } from '../firebase/index';
 
 import MessageBlock from './MessageBlock';
@@ -108,8 +108,8 @@ class HomePage extends Component {
         <Row>
           <Col xs={12} md={12}>
             <Panel>
-              <Panel.Heading>System Map</Panel.Heading>
-              <Panel.Body><SystemMap mapHeight={200} mapWidth={200} nodeList={this.state.nodeList}/> </Panel.Body>
+              <Panel.Heading>System Map </Panel.Heading>
+              <Panel.Body><Button bsStyle="primary">Center Map on Approx Location</Button><SystemMap mapHeight={200} mapWidth={200} nodeList={this.state.nodeList}/> </Panel.Body>
             </Panel>
           </Col>
         </Row>
