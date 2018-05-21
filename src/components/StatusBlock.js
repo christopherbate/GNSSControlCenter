@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import {firebase} from '../firebase/index';
+import {Label} from 'react-bootstrap';
 
 class StatusBlock extends Component {
 
@@ -7,6 +8,7 @@ class StatusBlock extends Component {
         super(props);
         this.info = {
             status: 'OFFLINE',
+            eph: 0,
             nodes: 0
         };
         this.state = {
@@ -19,7 +21,7 @@ class StatusBlock extends Component {
         messageRef.on('value', (snapshot) => {
             console.log(snapshot.val());
             if(!!snapshot.val()) {
-                this.info = {status: snapshot.val().status, num_nodes: snapshot.val().num_nodes};
+                this.info = {status: snapshot.val().status, eph: snapshot.val().ephTime };
                 this.setState( {info: this.info } );
             }
         } );
@@ -29,6 +31,11 @@ class StatusBlock extends Component {
         return (
         <div>
            <p>System Status: {this.state.info.status}</p>
+           <p>Eph Stamp:{
+                (((new Date(this.state.info.eph)) - (new Date()).getTime()) < 2*60*60*1000) ? 
+                (<Label bsStyle="success">{this.state.info.eph}</Label>):
+                (<Label bsStyle="danger">{this.state.info.eph}</Label>)
+           } </p>
         </div>
         );
     }

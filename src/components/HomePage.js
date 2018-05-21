@@ -17,12 +17,16 @@ class HomePage extends Component {
 
     this.nodeList = {};
     this.markerList = {};
+    this.centerMap = [-105.035857, 39.912612];
 
     this.state = {
       nodeList: {},
       markerList: {},
-      controlState: 'SETUP'
+      controlState: 'SETUP',
+      centerMap: this.centerMap
     };
+
+    //console.log(this.state);
   }
 
   componentWillMount() {
@@ -32,7 +36,7 @@ class HomePage extends Component {
     });
 
     firebase.db.ref('/state/status').on('value', (snap) => {
-      this.setState({controlState: snap.val()});
+      this.setState({ controlState: snap.val() });
       console.log("Control state set to: " + (snap.val()));
     });
 
@@ -64,6 +68,19 @@ class HomePage extends Component {
       this.setState({ nodeList: this.nodeList, dataListKeys: this.dataListKeys, positions: this.positions });
     });
   }
+
+  onClickCenterMap() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        this.setState({
+          centerMap: [pos.coords.longitude, pos.coords.latitude]
+        });
+      });
+    } else {
+      console.log("Geolocation is not supported by this browser.");
+    }
+  }
+
 
   render() {
     return (
@@ -109,7 +126,7 @@ class HomePage extends Component {
           <Col xs={12} md={12}>
             <Panel>
               <Panel.Heading>System Map </Panel.Heading>
-              <Panel.Body><Button bsStyle="primary">Center Map on Approx Location</Button><SystemMap mapHeight={200} mapWidth={200} nodeList={this.state.nodeList}/> </Panel.Body>
+              <Panel.Body><Button bsStyle="primary" onClick={this.onClickCenterMap.bind(this)}>Center Map on Approx Location</Button><SystemMap mapHeight={200} centerMap={this.state.centerMap} mapWidth={200} nodeList={this.state.nodeList} /> </Panel.Body>
             </Panel>
           </Col>
         </Row>

@@ -28,30 +28,31 @@ class ControlBlock extends Component {
     onClickUpdate(e) {
         var ts = Math.round((new Date()).getTime() / 1000);
         firebase.db.ref("/command").update( {
-            'update': ts
+            'posupdate': ts
         });
     }
-
-    onClickHideExpSetup(){
-        this.setState({showExpSetup:false});
-    }
-
+    //------------------------------------EPHEMERIS UPDATE-------------------------------------------
     onClickHideEphModal(){
         this.setState({showEphModal:false});
     }
-
     onClickEphemeris(e) {
         this.setState({showEphModal: true});
     }
-
     onClickEphStart(e) {
         this.setState({showEphModal: false});
         firebase.db.ref("/command").update({
-            'get_eph': this.state.ephNodeName
+            'ephupdate': this.state.ephNodeName
         });
-        console.log("Getting eph from " + this.state.ephNodeName);
+        // transition to EPH_REQUESTED
+        firebase.db.ref("/state/").update({
+            status: 'EPH_REQUESTED'
+        });
     }
-
+    
+    //------------------------------------EXP START AND STOP------------------------------------------
+    onClickHideExpSetup(){
+        this.setState({showExpSetup:false});
+    }
     onClickStartExp(e) {
         this.setState( {showExpSetup:true} );
     }
@@ -60,6 +61,12 @@ class ControlBlock extends Component {
         firebase.db.ref('state').update({
             'status':'SETUP',
             'expkey': null
+        });
+        
+
+        // Tell server to issue stop command.
+        firebase.db.ref('/command').update({
+            'stopexp': new Date()
         });
 
         // Clear the individual node plot data.
@@ -76,9 +83,6 @@ class ControlBlock extends Component {
         // This is for starting experiment.
         // Hide the modal.
         this.setState( {showExpSetup: false});
-        
-        // Create new time.
-        var ts = Math.round((new Date()).getTime()/1000);
 
         // Create a new experiment entry and new plots for each of the nodes.
         var agcPlots = {};
@@ -104,7 +108,7 @@ class ControlBlock extends Component {
         expRef.update({
             'agcplots': agcPlots,
             'expname': this.state.expSetupName,
-            'start_time': ts
+            'start_time': (new Date).getTime()
         });       
 
         // Update the current experiment.
@@ -112,6 +116,16 @@ class ControlBlock extends Component {
             'expkey': expRef.key,
             'status': 'STARTED'            
         });
+
+        // Check the ph time.
+        firebase.db.ref('/state/ephTime').once('value', (snap) => {
+            var ephTime = new Date(snap.val());
+            if( (new Date()).getTime() - ephTime.getTime() < 2*60*60*1000) {
+                firebase.db.ref('/state').update({
+                    'status': 'ARMED'
+                });
+            }
+        })
     }
 
     //---------------- CONTROL COMMANDS ------------------------------------
@@ -220,10 +234,10 @@ class ControlBlock extends Component {
                 <Row>
                     <Col xs={6}>
                         <Button bsStyle="primary" onClick={this.onClickUpdate.bind(this)} disabled={!(this.props.controlState==="ARMED")} >Get Assisted Position Update</Button>
-                        <Button bsStyle="primary" onClick={this.onClickEphemeris.bind(this)} disabled={!(this.props.controlState==="ARMED"||this.props.controlState==="SETUP")}>Get Ephemeris Update</Button>
+                        <Button bsStyle="primary" onClick={this.onClickEphemeris.bind(this)} disabled={!(this.props.controlState==="ARMED"||this.props.controlState==="STARTED")}>Get Ephemeris Update</Button>
                         <Button bsStyle="primary" onClick={this.onClickStartExp.bind(this)} disabled={!(this.props.controlState==="SETUP")}>Start Experiment</Button>
-                        <Button bsStyle="primary" onClick={this.onClickStopExp.bind(this)} disabled={!(this.props.controlState==="ARMED"||this.props.controlState==="STARTED")}>Stop Experiment</Button>
-                        <Button bsStyle="primary" onClick={this.onClickSpec.bind(this)} disabled={!(this.props.controlState==="ARMED"||this.props.controlState==="STARTED")}>Get Spectrum Plots</Button>                                             
+                        <Button bsStyle="primary" onClick={this.onClickStopExp.bind(this)} disabled={(this.props.controlState==="SETUP")}>Stop Experiment</Button>
+                        <Button bsStyle="primary" onClick={this.onClickSpec.bind(this)} disabled={false}>Get Spectrum Plots</Button>                                             
                     </Col>
                     <Col xs={6}>
                         <Form>
