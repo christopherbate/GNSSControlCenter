@@ -41,7 +41,7 @@ class ExpHistory extends React.Component {;
                                 {
                                     Object.keys(this.state.expList).reverse().map( (expKey,i) => (
                                         <li key={i}>
-                                            <Link to={"/history/"+expKey}>{ (new Date(this.state.expList[expKey].start_time*1000)).toLocaleString("en-US",options)}</Link>
+                                            <Link to={"/history/"+expKey}>{ (new Date(this.state.expList[expKey].start_time)).toLocaleString("en-US",options)}</Link>
                                         </li>
                                     ))                                    
                                 }

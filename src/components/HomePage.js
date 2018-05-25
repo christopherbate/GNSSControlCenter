@@ -96,7 +96,6 @@ class HomePage extends Component {
             <Panel>
               <Panel.Heading>System Status</Panel.Heading>
               <Panel.Body>
-                <StatusBlock />
               </Panel.Body>
             </Panel>
           </Col>
@@ -111,7 +110,6 @@ class HomePage extends Component {
           <Col xs={12} md={12}>
             <Panel>
               <Panel.Heading>Experiment Control</Panel.Heading>
-              <Panel.Body><ControlBlock nodeList={this.nodeList} controlState={this.state.controlState} /></Panel.Body>
             </Panel>
           </Col>
         </Row>

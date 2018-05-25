@@ -11,6 +11,9 @@ import * as routes from '../constants/routes';
 import ExpHistory from './ExpHistory';
 import ExpDetail from './ExpDetail';
 import Localize from './Localization';
+import Experiments from './Experiments';
+import ExpControl from './ExpControl';
+import NodeStatus from './NodeStatus';
 import withAuthentication from './withAuthentication';
 
 const App = () => (
@@ -55,6 +58,18 @@ const App = () => (
           <Route
             path={routes.HISTORY_DETAIL}
             render={(props) => <ExpDetail {...props} />}
+          />
+          <Route
+            path={routes.EXP_CONTROL}
+            render={(props) => <ExpControl {...props} /> }
+          />
+          <Route
+            path={routes.NODE_STATUS}
+            render={(props)=><NodeStatus {...props} /> }
+          />
+          <Route
+            exact path={routes.EXP}
+            render={()=><Experiments />}
           />
         </Col>
       </Row>

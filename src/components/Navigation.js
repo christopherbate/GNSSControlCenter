@@ -9,9 +9,10 @@ import {LinkContainer} from 'react-router-bootstrap';
 
 const AuthdLinks = () => (
   <Nav>
-    <LinkContainer to={routes.HOME}><NavItem>Control Page</NavItem></LinkContainer>
+    <LinkContainer to={routes.EXP}><NavItem>Experiments</NavItem></LinkContainer>
+    <LinkContainer to={routes.NODE_STATUS}><NavItem>Nodes</NavItem></LinkContainer>
     <LinkContainer to={routes.HISTORY}><NavItem>History</NavItem></LinkContainer>
-    <LinkContainer to={routes.LOCALIZE}><NavItem>Localize</NavItem></LinkContainer>
+    <LinkContainer to={routes.LOCALIZE}><NavItem>Localize</NavItem></LinkContainer>    
     <NavItem><LogoutButton /></NavItem>
   </Nav>
 );

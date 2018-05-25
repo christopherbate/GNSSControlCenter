@@ -9,16 +9,23 @@ class MessageBlock extends Component {
         this.state = {
             messages: this.messages
         };
+        this.dataLoc = '';
     }
 
     componentWillMount() {
-        var messageRef = firebase.db.ref('/messages').orderByKey().limitToLast(100);
+        var messageRef;
+        if(this.props.dataLoc) {
+            messageRef = firebase.db.ref(this.props.dataLoc).orderByKey().limitToLast(100);
+            this.dataLoc = this.props.dataLoc;
+        } else {
+            messageRef = firebase.db.ref('/messages').orderByKey().limitToLast(100);
+            this.dataLoc = '/messages';
+        }            
         messageRef.on('child_added', (snapshot) => {
             this.messages[snapshot.key] = snapshot.val();
             this.setState({ messages: this.messages });
             return true;
         });
-
         messageRef.on('child_removed', (snapshot) => {
             if (snapshot.key !== null) {
                 delete this.messages[snapshot.key];
@@ -26,6 +33,10 @@ class MessageBlock extends Component {
             this.setState({ messages: this.messages });
             return true;
         });
+    }
+
+    componentWillUnmount() {
+        firebase.db.ref(this.dataLoc).off();
     }
 
     render() {

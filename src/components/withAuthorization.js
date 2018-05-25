@@ -16,7 +16,7 @@ const withAuthorization = (authCondition) => (Component) => {
         }
 
         render() {
-            return this.context.authUser ? <Component /> : null;
+            return this.context.authUser ? <Component match={this.props.match} /> : null;
         }
     }
 

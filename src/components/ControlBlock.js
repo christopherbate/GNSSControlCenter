@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import {Button} from 'react-bootstrap';
 import {firebase} from '../firebase/index';
 import {Grid, Row, Col, Modal, Radio} from 'react-bootstrap';
+import {Link} from 'react-router-dom';
 import {FormGroup,Checkbox,FormControl,ControlLabel, Form} from 'react-bootstrap';
 class ControlBlock extends Component {
 
@@ -9,27 +10,50 @@ class ControlBlock extends Component {
         super(props);
         this.state = {
             buttonPressed: null,
-            showExpSetup: false,
             showEphModal: false,
+            showRebootModal: false,
+            showTermModal: false,
+            rebootNodeName: "mz0",
             ephNodeName: "mz0",
-            agcThresh: 0,
+            agcThresh: 7,
             agcThreshChange: 0,
-            nominalAGC: 0,
+            nominalAGC: 12,
             nominalAGCChange: 0,
             expSetupName: "Enter Name"
         };
     }
 
     componentWillMount(){
-        firebase.db.ref("/settings/agcThresh").on("value", (snap) => ( this.setState({agcThresh: snap.val()}) ));
-        firebase.db.ref("/settings/nomAGC").on("value", snap => ( this.setState({nominalAGC: snap.val()}) ));
+        firebase.db.ref("/expinfo_a/"+this.props.expKey+"/settings/agcThresh").on("value", (snap) => ( 
+            this.setState({agcThresh: snap.val()}) 
+        ));
+        firebase.db.ref("/expinfo_a/"+this.props.expKey+"/settings/nomAgc").on("value", snap => ( 
+            this.setState({nominalAGC: snap.val()}) 
+        ));
+    }
+
+    postCommand( type, value) {
+        var newCmdRef = firebase.db.ref("/command").push().set({
+            'type': type,
+            'value': value,
+            'expkey': this.props.expKey,
+            'expname': this.props.expData.expname
+        });
+    }
+    updateExpStatus( status ) {
+        firebase.db.ref('/expinfo_a/'+this.props.expKey).update({
+            'status': status
+        })
     }
 
     onClickUpdate(e) {
-        var ts = Math.round((new Date()).getTime() / 1000);
-        firebase.db.ref("/command").update( {
-            'posupdate': ts
-        });
+        var ts = Math.round((new Date()).getTime());
+        this.postCommand('postupdate', ts);
+    }
+    //-----------------------------------NODE CONTROL-----------------------------------------------
+    onClickRebootNode() {
+        this.setState({showRebootModal: false});
+        this.postCommand('reboot', this.state.rebootNodeName);
     }
     //------------------------------------EPHEMERIS UPDATE-------------------------------------------
     onClickHideEphModal(){
@@ -39,57 +63,31 @@ class ControlBlock extends Component {
         this.setState({showEphModal: true});
     }
     onClickEphStart(e) {
-        this.setState({showEphModal: false});
-        firebase.db.ref("/command").update({
-            'ephupdate': this.state.ephNodeName
-        });
-        // transition to EPH_REQUESTED
-        firebase.db.ref("/state/").update({
-            status: 'EPH_REQUESTED'
-        });
+        this.setState({showEphModal: false});        
+        this.postCommand('ephupdate',this.state.ephNodeName);
     }
-    
+    onRadioChange(event){
+        this.setState({ephNodeName:event.target.value});
+    }
     //------------------------------------EXP START AND STOP------------------------------------------
-    onClickHideExpSetup(){
-        this.setState({showExpSetup:false});
-    }
-    onClickStartExp(e) {
-        this.setState( {showExpSetup:true} );
-    }
     onClickStopExp(e) {
-        // Change the state and the experiment key.
-        firebase.db.ref('state').update({
-            'status':'SETUP',
-            'expkey': null
-        });
-        
-
         // Tell server to issue stop command.
-        firebase.db.ref('/command').update({
-            'stopexp': new Date()
-        });
-
-        // Clear the individual node plot data.
-        Object.keys(this.props.nodeList).map( (nodeName,index) =>{
-            firebase.db.ref('state/nodes/'+nodeName).update({
-                'streamKey': null,
-                'specKey': null,
-                'errcnt': 0
-            });
-            return true;
-        });
+        this.postCommand('pauseexp', (new Date()).getTime());
     }
-    onClickExpModalStart(e){
-        // This is for starting experiment.
-        // Hide the modal.
-        this.setState( {showExpSetup: false});
-
+    terminateExp(e) {
+        this.setState({
+            showTermModal: true
+        });
+        this.postCommand('terminateexp',(new Date()).getTime());       
+    }
+    onClickStart(e){
         // Create a new experiment entry and new plots for each of the nodes.
         var agcPlots = {};
-        var expRef = firebase.db.ref('/expinfo/').push();
+        
         Object.keys(this.props.nodeList).map( (nodeName,index) =>{
             // Add a new agc plot to each MZNT node that is online.
             if(this.props.nodeList[nodeName].status === 'online'){
+                console.log("Setting node stream key "+nodeName);
                 var agcStream = firebase.db.ref('/agcdata').push();
                 agcPlots[nodeName] = agcStream.key;    
                 firebase.db.ref('state/nodes/'+nodeName).update({
@@ -99,74 +97,37 @@ class ControlBlock extends Component {
             return true;
         });
 
-        // Tell the nodes to start logging.
-        firebase.db.ref('/command').update({
-            'startexp': this.state.expSetupName
-        });
+        // Tell the nodes to start logging.        
+        this.postCommand('startexp', this.props.expData.expname);
 
         // Update the new experiment ref.
-        expRef.update({
+        firebase.db.ref('/expinfo_a'+this.props.expKey).update({
             'agcplots': agcPlots,
-            'expname': this.state.expSetupName,
-            'start_time': (new Date).getTime()
+            'start_time': (new Date()).getTime()
         });       
 
         // Update the current experiment.
-        firebase.db.ref('/state').update({
-            'expkey': expRef.key,
-            'status': 'STARTED'            
-        });
+        this.updateExpStatus("STARTED");
 
         // Check the ph time.
-        firebase.db.ref('/state/ephTime').once('value', (snap) => {
-            var ephTime = new Date(snap.val());
-            if( (new Date()).getTime() - ephTime.getTime() < 2*60*60*1000) {
-                firebase.db.ref('/state').update({
-                    'status': 'ARMED'
-                });
-            }
-        })
     }
 
     //---------------- CONTROL COMMANDS ------------------------------------
-    onClickRebootAll(e){        
-        firebase.db.ref("/command").update({
-            'rebootall': new Date()
-        });
-    }
-    onClickHaltAll(e) {
-        firebase.db.ref("/command").update({
-            'haltall': new Date()
-        });
-    }
     onClickSpec(e){
         // Change the state.
-        firebase.db.ref('/state').update({
-            status: "SPECREQUESTED"
-        });
-        // Tell the server we requested a spec.
-        firebase.db.ref("/command").update({
-            'getspec': new Date()
-        });
+        this.postCommand('getspec', (new Date()).getTime());
     }
 
     //-------------------- FORM CHANGE HANDLING ---------------------------
-    onRadioChange(event){
-        console.log(event.target.value);
-        this.setState({ephNodeName:event.target.value});
-    }
     handleChangeAGCT(event){
         this.setState({ agcThreshChange: event.target.value });
     }
     handleChangeAGCNom(event){
         this.setState({ nominalAGCChange: event.target.value });
     }
-    handleExpSetupName(event){
-        this.setState({expSetupName: event.target.value});
-    }
     onUpdateAGCT(event){
         if(!isNaN(this.state.agcThreshChange)){
-            firebase.db.ref("/settings").update({
+            firebase.db.ref("expinfo_a/"+this.props.expKey+"/settings").update({
                 'agcThresh': this.state.agcThreshChange
             });
         } else {
@@ -175,7 +136,7 @@ class ControlBlock extends Component {
     }
     onUpdateAGCN(event){
         if(!isNaN(this.state.nominalAGCChange)){
-            firebase.db.ref("/settings").update({
+            firebase.db.ref("expinfo_a/"+this.props.expKey+"/settings").update({
                 'nomAGC': this.state.nominalAGCChange
             });
         } else {
@@ -183,17 +144,12 @@ class ControlBlock extends Component {
         }
     }
     //-----------------------------------------------------------------------
-
     getLocationPos() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition( (pos) => {
                 //You have your locaton here
                 console.log("Latitude: " + pos.coords.latitude +" Longitude: " + pos.coords.longitude);
-                firebase.db.ref("/markers").push().set({
-                    'long': pos.coords.longitude,
-                    'lat':pos.coords.latitude,
-                    'name': "M"
-                });
+               
                 return true;
             });
         } else {
@@ -205,21 +161,7 @@ class ControlBlock extends Component {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition( (pos) => {
                 //You have your locaton here
-                console.log("Latitude: " + pos.coords.latitude +" Longitude: " + pos.coords.longitude);
-                firebase.db.ref('/settings/expkey').once('value', (snap)=>{
-                    firebase.db.ref("/markers").push().set({
-                        'long': pos.coords.longitude,
-                        'lat':pos.coords.latitude,
-                        'name': "INT"
-                    });
-                    firebase.db.ref("/expinfo/"+snap.val()+"/int").push().set({
-                        'long': pos.coords.longitude,
-                        'lat':pos.coords.latitude,
-                        'name': "INT",
-                        'time': Math.round((new Date()).getTime()/1000)
-                    });
-                });
-                
+                console.log("Latitude: " + pos.coords.latitude +" Longitude: " + pos.coords.longitude);               
                 return true;
             });
         } else {
@@ -235,8 +177,8 @@ class ControlBlock extends Component {
                     <Col xs={6}>
                         <Button bsStyle="primary" onClick={this.onClickUpdate.bind(this)} disabled={!(this.props.controlState==="ARMED")} >Get Assisted Position Update</Button>
                         <Button bsStyle="primary" onClick={this.onClickEphemeris.bind(this)} disabled={!(this.props.controlState==="ARMED"||this.props.controlState==="STARTED")}>Get Ephemeris Update</Button>
-                        <Button bsStyle="primary" onClick={this.onClickStartExp.bind(this)} disabled={!(this.props.controlState==="SETUP")}>Start Experiment</Button>
-                        <Button bsStyle="primary" onClick={this.onClickStopExp.bind(this)} disabled={(this.props.controlState==="SETUP")}>Stop Experiment</Button>
+                        <Button bsStyle="primary" onClick={this.onClickStart.bind(this)} disabled={!(this.props.controlState==="SETUP")}>Start Experiment</Button>
+                        <Button bsStyle="primary" onClick={this.onClickStopExp.bind(this)} disabled={(this.props.controlState==="SETUP")}>Pause Experiment</Button>
                         <Button bsStyle="primary" onClick={this.onClickSpec.bind(this)} disabled={false}>Get Spectrum Plots</Button>                                             
                     </Col>
                     <Col xs={6}>
@@ -258,12 +200,22 @@ class ControlBlock extends Component {
                         <Button bsStyle="primary" disabled={!this.state.jamButtonActive} onClick={this.addLocationJam.bind(this)}>Mark Jammer</Button>
                     </Col>
                     <Col xs={6}>
-                        <Button bsStyle="danger" onClick={this.onClickRebootAll.bind(this)}>Remote Reboot Nodes</Button>
-                        <Button bsStyle="danger" onClick={this.onClickHaltAll.bind(this)}> Halt all </Button>
+                        <Button bsStyle="danger" onClick={()=>(this.setState({showRebootModal:true}))}>Remote Reboot Nodes</Button>
+                        <Button bsStyle="danger" onClick={this.terminateExp.bind(this)}>TerminateExperiment</Button>
                     </Col>
                 </Row>
             </Grid>
-
+            <Modal show={this.state.showTermModal}>
+                <Modal.Header>
+                    <Modal.Title>Experiment Terminated</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Experiment has been termianted.
+                </Modal.Body>
+                <Modal.Footer>
+                    <Link to="/experiments"> <Button>OK</Button> </Link>
+                </Modal.Footer>
+            </Modal>
             <Modal show={this.state.showEphModal} onHide={this.onClickHideEphModal.bind(this)}>
                 <Modal.Header closeButton>
                 </Modal.Header>
@@ -284,16 +236,23 @@ class ControlBlock extends Component {
                 </Modal.Body>
             </Modal>
 
-            <Modal show={this.state.showExpSetup} onHide={this.onClickHideExpSetup.bind(this)}>
-                <Modal.Header closeButton>Experiment Setup</Modal.Header>
+            <Modal show={(this.state.showRebootModal)} onHide={()=>(this.setState({showRebootModal:false}))}>
+                <Modal.Header closeButton>
+                </Modal.Header>
                 <Modal.Body>
-                    <Form>
+                    <form>
                         <FormGroup>
-                            <ControlLabel>Experiment Name</ControlLabel>
-                            <FormControl type="text" value={this.state.expSetupName} onChange={this.handleExpSetupName.bind(this)} />
-                            <Button bsStyle="primary" onClick={this.onClickExpModalStart.bind(this)}>Start</Button>
+                            {
+                                Object.keys(this.props.nodeList).map( (nodeName, index) => (
+                                    <Radio value={nodeName} name="rebootGroup" key={index} onChange={ (event)=>(this.setState({rebootNodeName:event.target.value})) }>{nodeName}</Radio>
+                                ))
+                            }
                         </FormGroup>
-                    </Form>
+                        <p>Selected Node Name: {this.state.rebootNodeName}</p>
+                        <FormGroup>
+                            <Button bsStyle="warning" onClick={this.onClickRebootNode.bind(this)}>Send Reboot Command</Button>
+                        </FormGroup>
+                    </form>
                 </Modal.Body>
             </Modal>
         </div>
