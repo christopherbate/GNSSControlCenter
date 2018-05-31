@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import {firebase} from '../firebase/index';
 import {Label} from 'react-bootstrap';
 
 class StatusBlock extends Component {

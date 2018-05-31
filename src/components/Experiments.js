@@ -36,7 +36,7 @@ class Experiments extends Component {
             return this.setState({ expList: this.expList });
         });
 
-        this.timerID = setInterval( ()=>(this.setState({time: (new Date).getTime()})), 1000 );
+        this.timerID = setInterval( ()=>(this.setState({time: (new Date()).getTime()})), 1000 );
     }
 
     componentWillUnmount() {
@@ -72,9 +72,10 @@ class Experiments extends Component {
                                         </td>
                                         <td>
                                             {
+                                                !!this.state.expList[expKey].nodes ?
                                                 Object.keys(this.state.expList[expKey].nodes).map( (nodeName,index) => (
                                                     <p key={index}>{nodeName}</p>
-                                                ))
+                                                )) : null
                                             }
                                         </td>
                                         <td>

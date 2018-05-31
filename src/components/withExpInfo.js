@@ -1,5 +1,4 @@
 import React from 'react';
-
 import {firebase} from '../firebase/index';
 
 const withExpInfo = (Component) => {
@@ -26,9 +25,9 @@ const withExpInfo = (Component) => {
             });
         }
         unsubscribeToNodes() {
-            Object.keys(this.nodeGroupData).map((key,index) => {
-                firebase.db.ref('/state/nodes/'+key).off();
-            })            
+            Object.keys(this.nodeGroupData).map((key,index) => (
+                firebase.db.ref('/state/nodes/'+key).off()
+            ));            
         }
         componentWillMount() {
             firebase.db.ref('/expinfo_a/'+this.props.match.params.id).on('value', (snapshot) => {

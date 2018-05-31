@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { Grid, Panel, Modal,Row, Col, Button, Tab, Tabs } from 'react-bootstrap';
-import { firebase } from '../firebase/index';
+import { Grid, Panel, Modal,Row, Col, Button, Tab, Tabs, Table } from 'react-bootstrap';
 import {Link} from 'react-router-dom';
 import MessageBlock from './MessageBlock';
 import SystemMap from './SystemMap';
@@ -10,7 +9,6 @@ import StatusBlock from './StatusBlock';
 import ControlBlock from './ControlBlock';
 import AGCPlots from './AGCPlot';
 import withExpInfo from './withExpInfo';
-import { Control } from 'mapbox-gl';
 
 class ExpControl extends Component {
 
@@ -35,7 +33,7 @@ class ExpControl extends Component {
         return (
         <div>
             <Tabs activeKey={this.state.activeKey} onSelect={(key) => { this.setState({ activeKey: key }) }} id="controlled-tab" >
-                <Tab title="Current Experiments" eventKey={1} >
+                <Tab title="Experiment Information" eventKey={1} >
                     <br />
                     <Grid>
                         <Row>
@@ -127,6 +125,35 @@ class ExpControl extends Component {
                         <ControlBlock nodeList={this.props.nodeGroupData} controlState={this.props.expData.status} expKey={this.props.match.params.id} expData={this.props.expData} /> :
                         null
                     }
+                </Tab>
+
+                <Tab eventKey={4} title="Events" >
+                    <br />
+                    <Panel> 
+                        <Panel.Heading>
+                            Events
+                        </Panel.Heading>
+
+                        <Panel.Body>
+                            <Table>
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>                                                                                
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {
+                                        this.props.expData && this.props.expData.events ?
+                                        Object.keys(this.props.expData.events).map((eventKey,index) =>(
+                                            <tr>
+                                                <td>{(new Date(this.props.expData.events[eventKey].detectTime)).toISOString()}</td>
+                                            </tr>
+                                        )) : null
+                                    }
+                                </tbody>
+                            </Table>
+                        </Panel.Body>
+                    </Panel>
                 </Tab>
 
             </Tabs>

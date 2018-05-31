@@ -6,7 +6,6 @@ import Navigation from './Navigation';
 import LandingPage from './LandingPage';
 import SignUpPage from './SignupPage';
 import LoginPage from './LoginPage';
-import HomePage from './HomePage';
 import * as routes from '../constants/routes';
 import ExpHistory from './ExpHistory';
 import ExpDetail from './ExpDetail';
@@ -15,6 +14,7 @@ import Experiments from './Experiments';
 import ExpControl from './ExpControl';
 import NodeStatus from './NodeStatus';
 import withAuthentication from './withAuthentication';
+import NodeControl from './NodeControl';
 
 const App = () => (
   <Router>
@@ -40,10 +40,6 @@ const App = () => (
             component={() => <LoginPage />}
           />
           <Route
-            exact path={routes.HOME}
-            component={() => <HomePage />}
-          />
-          <Route
             exact path={routes.SIGN_UP}
             component={() => <SignUpPage />}
           />
@@ -64,8 +60,12 @@ const App = () => (
             render={(props) => <ExpControl {...props} /> }
           />
           <Route
-            path={routes.NODE_STATUS}
+            exact path={routes.NODE_STATUS}
             render={(props)=><NodeStatus {...props} /> }
+          />
+          <Route
+            path = {routes.NODE_CONTROL}
+            render={(props)=> <NodeControl {...props} /> }
           />
           <Route
             exact path={routes.EXP}

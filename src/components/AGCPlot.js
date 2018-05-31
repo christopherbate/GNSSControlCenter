@@ -1,6 +1,6 @@
 import React from 'react';
 import { Grid, Panel, Row, Col, Image } from 'react-bootstrap';
-import { VictoryLine, VictoryChart, VictoryTheme, VictoryLegend, VictoryAxis } from 'victory';
+import { VictoryLine, VictoryChart, VictoryTheme, VictoryLegend} from 'victory';
 import { firebase } from '../firebase/index';
 
 const reducer = (accumulator, currentValue) => ({ ch1: accumulator.ch1 + currentValue.ch1 });

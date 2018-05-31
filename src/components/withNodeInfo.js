@@ -1,9 +1,7 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import {withRouter} from 'react-router-dom';
 
 import {firebase} from '../firebase/index';
-import * as routes from '../constants/routes';
 
 const withNodeInfo = (Component) => {
     class WithNodeInfo extends React.Component {
@@ -34,7 +32,7 @@ const withNodeInfo = (Component) => {
             firebase.db.ref('/state/nodes').off();
         }
         render() {
-            return <Component nodeList={this.state.nodeList} />;
+            return <Component nodeList={this.state.nodeList} {...this.props} />;
         }
     }
 

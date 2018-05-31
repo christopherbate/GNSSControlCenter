@@ -33,7 +33,7 @@ class ControlBlock extends Component {
     }
 
     postCommand( type, value) {
-        var newCmdRef = firebase.db.ref("/command").push().set({
+        firebase.db.ref("/command").push().set({
             'type': type,
             'value': value,
             'expkey': this.props.expKey,
@@ -101,15 +101,13 @@ class ControlBlock extends Component {
         this.postCommand('startexp', this.props.expData.expname);
 
         // Update the new experiment ref.
-        firebase.db.ref('/expinfo_a'+this.props.expKey).update({
+        firebase.db.ref('/expinfo_a/'+this.props.expKey).update({
             'agcplots': agcPlots,
             'start_time': (new Date()).getTime()
         });       
 
         // Update the current experiment.
-        this.updateExpStatus("STARTED");
-
-        // Check the ph time.
+        this.updateExpStatus("ARMED");
     }
 
     //---------------- CONTROL COMMANDS ------------------------------------
