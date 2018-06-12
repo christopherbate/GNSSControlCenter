@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 
 import {Link, withRouter} from 'react-router-dom';
-import {auth} from '../firebase/index';
-import * as routes from '../constants/routes';
+import {auth} from '../../firebase/index';
+import * as routes from '../../constants/routes';
 import {FormGroup,Grid,Col,Row,FormControl,Form, Button} from 'react-bootstrap';
 
 class SignUpPage extends Component {

@@ -136,7 +136,7 @@ class NewExpForm extends Component {
                         <Modal.Title>Successfully Setup Experiment</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                        <Link to={"/nodes/"}><Button bsStyle="primary">Go To Experiment Control Page</Button></Link>
+                        <Link to={"/experiments/list"}><Button bsStyle="primary">Go To Experiment Control Page</Button></Link>
                     </Modal.Body>
                 </Modal>
             </div>

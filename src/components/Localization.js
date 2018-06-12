@@ -1,9 +1,10 @@
 import React from 'react';
 import {Grid,Row,Col} from 'react-bootstrap';
-import withAuthorization from './withAuthorization';
 import {Panel} from 'react-bootstrap';
 import {firebase} from '../firebase/index';
 import {Link} from 'react-router-dom';
+
+import withAuthorization from './HOCs/withAuthorization';
 
 class ExpHistory extends React.Component {;
     constructor(props)

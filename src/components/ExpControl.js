@@ -1,14 +1,16 @@
 import React, { Component } from 'react';
-import { Grid, Panel, Modal,Row, Col, Button, Tab, Tabs, Table } from 'react-bootstrap';
-import {Link} from 'react-router-dom';
+import { Grid, Panel, Modal, Row, Col, ProgressBar, Button, Tab, Tabs, Table } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 import MessageBlock from './MessageBlock';
 import SystemMap from './SystemMap';
-import withAuthorization from './withAuthorization';
 import NodeList from './NodeList';
 import StatusBlock from './StatusBlock';
 import ControlBlock from './ControlBlock';
-import AGCPlots from './AGCPlot';
-import withExpInfo from './withExpInfo';
+import AGCPlots from './charts/AGCPlot';
+import EventDetail from './EventDetail';
+
+import withAuthorization from './HOCs/withAuthorization';
+import withExpInfo from './HOCs/withExpInfo';
 
 class ExpControl extends Component {
 
@@ -22,8 +24,8 @@ class ExpControl extends Component {
             terminatedShow: false
         }
     }
-    componentDidMount(){
-        if(this.props.expData === null) {
+    componentDidMount() {
+        if (this.props.expData === null) {
             this.setState({
                 terminatedShow: true
             });
@@ -31,141 +33,149 @@ class ExpControl extends Component {
     }
     render() {
         return (
-        <div>
-            <Tabs activeKey={this.state.activeKey} onSelect={(key) => { this.setState({ activeKey: key }) }} id="controlled-tab" >
-                <Tab title="Experiment Information" eventKey={1} >
-                    <br />
-                    <Grid>
-                        <Row>
-                            <Col xs={12} md={6}>
-                                <Panel xs={12} md={6}>
-                                    <Panel.Heading>
-                                        Nodes in Experiment
+            <div>
+                <Tabs activeKey={this.state.activeKey} onSelect={(key) => { this.setState({ activeKey: key }) }} id="controlled-tab" >
+                    <Tab title="Experiment Information" eventKey={1} >
+                        <br />
+                        <Grid>
+                            <Row>
+                                <Col xs={12} md={6}>
+                                    <Panel xs={12} md={6}>
+                                        <Panel.Heading>
+                                            Nodes in Experiment
                                     </Panel.Heading>
-                                    <Panel.Body>
-                                        {
-                                            this.props.nodeGroupData ?
-                                                <NodeList nodeList={this.props.nodeGroupData} /> :
-                                                null
-                                        }
-                                    </Panel.Body>
-                                </Panel>
-                            </Col>
-                            <Col xs={12} md={6}>
-                                <Panel>
-                                    <Panel.Heading>
-                                        Experiment Messages
+                                        <Panel.Body>
+                                            {
+                                                this.props.nodeGroupData ?
+                                                    <NodeList nodeList={this.props.nodeGroupData} /> :
+                                                    null
+                                            }
+                                        </Panel.Body>
+                                    </Panel>
+                                </Col>
+                                <Col xs={12} md={6}>
+                                    <Panel>
+                                        <Panel.Heading>
+                                            Experiment Messages
                                     </Panel.Heading>
-                                    <Panel.Body>
-                                        {
-                                            this.props.expData ?
-                                                <MessageBlock dataLoc={'/expinfo_a/' + this.props.match.params.id + '/messages'} /> :
-                                                null
-                                        }
-                                    </Panel.Body>
-                                </Panel>
-                            </Col>
-                            <Col xs={12} md={6}>
-                                <Panel>
-                                    <Panel.Heading>
-                                        Experiment Status
+                                        <Panel.Body>
+                                            {
+                                                this.props.expData ?
+                                                    <MessageBlock dataLoc={'/expinfo_a/' + this.props.match.params.id + '/messages'} /> :
+                                                    null
+                                            }
+                                            
+                                        </Panel.Body>
+                                    </Panel>
+                                </Col>
+                                <Col xs={12} md={6}>
+                                    <Panel>
+                                        <Panel.Heading>
+                                            Experiment Status
                                     </Panel.Heading>
-                                    <Panel.Body>
-                                        {
-                                            this.props.expData && this.props.expData.eph ?
-                                                <StatusBlock eph={this.props.expData.eph} status={this.props.expData.status} /> :
-                                                null
-                                        }
-                                    </Panel.Body>
-                                </Panel>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col xs={12} md={12}>
-                                <Panel>
-                                    <Panel.Heading>
-                                        Event Information
+                                        <Panel.Body>
+                                            {
+                                                this.props.expData && this.props.expData.eph ?
+                                                    <StatusBlock eph={this.props.expData.eph} status={this.props.expData.status} /> :
+                                                    null
+                                            }
+                                            {
+                                                this.props.expData && this.props.expData.ephupload ? 
+                                                <ProgressBar now={(this.props.expData.ephupload/107000000)*100} /> : null
+                                            }
+                                        </Panel.Body>
+                                    </Panel>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col xs={12} md={12}>
+                                    <Panel>
+                                        <Panel.Heading>
+                                            Event Information
                             </Panel.Heading>
-                                    <Panel.Body>
-                                        {
-                                            this.props.expData ?
-                                                null :
-                                                null
-                                        }
-                                    </Panel.Body>
-                                </Panel>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col xs={12}>
-                                <Panel>
-                                    <Panel.Heading>
-                                        System Map
+                                        <Panel.Body>
+                                            {
+                                                this.props.expData ?
+                                                    null :
+                                                    null
+                                            }
+                                        </Panel.Body>
+                                    </Panel>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col xs={12}>
+                                    <Panel>
+                                        <Panel.Heading>
+                                            System Map
                                     </Panel.Heading>
-                                    <Panel.Body>
-                                        {
-                                            this.props.nodeGroupData ?
-                                                <SystemMap mapWidth={200} centerMap={this.state.centerMap} nodeList={this.props.nodeGroupData} />
-                                                : null
-                                        }
-                                    </Panel.Body>
-                                </Panel>
-                            </Col>
-                        </Row>
-                    </Grid>
-                </Tab>
-                <Tab eventKey={2} title="AGC Information" >
-                    <br />
-                    <AGCPlots nodeList={this.props.nodeGroupData} />
-                </Tab>
-                <Tab eventKey={3} title="Experiment Control" >
-                    <br />
-                    {
-                        this.props.nodeGroupData && this.props.expData ?
-                        <ControlBlock nodeList={this.props.nodeGroupData} controlState={this.props.expData.status} expKey={this.props.match.params.id} expData={this.props.expData} /> :
-                        null
-                    }
-                </Tab>
+                                        <Panel.Body>
+                                            {
+                                                this.props.nodeGroupData ?
+                                                    <SystemMap mapWidth={200} centerMap={this.state.centerMap} nodeList={this.props.nodeGroupData} />
+                                                    : null
+                                            }
+                                        </Panel.Body>
+                                    </Panel>
+                                </Col>
+                            </Row>
+                        </Grid>
+                    </Tab>
+                    <Tab eventKey={2} title="AGC Information" >
+                        <br />
+                        <AGCPlots nodeList={this.props.nodeGroupData} dataLimit={60}/>
+                    </Tab>
+                    <Tab eventKey={3} title="Experiment Control" >
+                        <br />
+                        {
+                            this.props.nodeGroupData && this.props.expData ?
+                                <ControlBlock nodeList={this.props.nodeGroupData} controlState={this.props.expData.status} expKey={this.props.match.params.id} expData={this.props.expData} /> :
+                                null
+                        }
+                    </Tab>
 
-                <Tab eventKey={4} title="Events" >
-                    <br />
-                    <Panel> 
-                        <Panel.Heading>
-                            Events
+                    <Tab eventKey={4} title="Events" >
+                        <br />
+                        <Panel>
+                            <Panel.Heading>
+                                Events
                         </Panel.Heading>
 
-                        <Panel.Body>
-                            <Table>
-                                <thead>
-                                    <tr>
-                                        <th>Time</th>                                                                                
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {
-                                        this.props.expData && this.props.expData.events ?
-                                        Object.keys(this.props.expData.events).map((eventKey,index) =>(
-                                            <tr>
-                                                <td>{(new Date(this.props.expData.events[eventKey].detectTime)).toISOString()}</td>
-                                            </tr>
-                                        )) : null
-                                    }
-                                </tbody>
-                            </Table>
-                        </Panel.Body>
-                    </Panel>
-                </Tab>
+                            <Panel.Body>
+                                <Table striped bordered hover condensed>
+                                    <thead>
+                                        <tr>
+                                            <th>Detection Time</th>
+                                            <th>Details</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {
+                                            this.props.expData && this.props.expData.events ?
+                                                Object.keys(this.props.expData.events).map((eventKey, index) => (
+                                                    <tr key={index}>
+                                                        <td>{(new Date(this.props.expData.events[eventKey].detectTime)).toISOString()}</td>
 
-            </Tabs>
-            <Modal show={this.state.terminatedShow} onHide={ ()=>( this.setState({terminatedShow: false}) )} >
-            <Modal.Header>
-                <Modal.Title>This Experiment Has Been Terminated</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <Link to={"/experiments/"}><Button bsStyle="primary">Return to Experiments Page</Button></Link>
-            </Modal.Body>
-            </Modal>
-        </div>
+                                                        <EventDetail eventData={this.props.expData.events[eventKey]} />
+                                                    </tr>
+                                                )) : null
+                                        }
+                                    </tbody>
+                                </Table>
+                            </Panel.Body>
+                        </Panel>
+                    </Tab>
+
+                </Tabs>
+                <Modal show={this.state.terminatedShow} onHide={() => (this.setState({ terminatedShow: false }))} >
+                    <Modal.Header>
+                        <Modal.Title>This Experiment Has Been Terminated</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Link to={"/experiments/"}><Button bsStyle="primary">Return to Experiments Page</Button></Link>
+                    </Modal.Body>
+                </Modal>
+            </div>
         );
     }
 }

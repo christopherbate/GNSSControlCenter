@@ -3,8 +3,8 @@ import { Table, Button, Label, Tab, Tabs } from 'react-bootstrap';
 import { firebase } from '../firebase/index';
 import NewExpForm from './NewExpForm';
 import {Link} from 'react-router-dom';
-import withAuthorization from './withAuthorization';
-import withNodeInfo from './withNodeInfo';
+import withAuthorization from './HOCs/withAuthorization';
+import withNodeInfo from './HOCs/withNodeInfo';
 
 class Experiments extends Component {
 

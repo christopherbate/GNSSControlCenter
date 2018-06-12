@@ -9,4 +9,4 @@ export const MAPBOX = 'pk.eyJ1IjoiY2hiYTY0OTkiLCJhIjoiY2plaHB3YnQ5MGd1bzJ5bzY3cD
 export const HISTORY = '/history';
 export const HISTORY_DETAIL = '/history/:id';
 export const EXP_CONTROL = '/experiments/:id';
-export const NODE_CONTROL = '/nodes/:id';
+export const EXP_LIST ='/experiments/list';

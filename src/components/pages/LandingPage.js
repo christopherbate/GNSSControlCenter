@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {Grid,Col,Row,Jumbotron,Button} from 'react-bootstrap';
 import {LinkContainer} from 'react-router-bootstrap';
-import * as routes from '../constants/routes';
+import * as routes from '../../constants/routes';
 
 class LandingPage extends Component {
   render() {

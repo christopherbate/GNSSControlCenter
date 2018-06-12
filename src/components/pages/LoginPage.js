@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { auth } from '../firebase/index';
-import * as routes from '../constants/routes';
+import { auth } from '../../firebase/index';
+import * as routes from '../../constants/routes';
 import { withRouter } from 'react-router-dom';
 import { FormGroup, Grid, Col, Row, FormControl, Form, Button } from 'react-bootstrap';
 

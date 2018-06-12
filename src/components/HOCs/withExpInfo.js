@@ -1,5 +1,5 @@
 import React from 'react';
-import {firebase} from '../firebase/index';
+import {firebase} from '../../firebase/index';
 
 const withExpInfo = (Component) => {
     class WithExpInfo extends React.Component {
@@ -10,7 +10,7 @@ const withExpInfo = (Component) => {
             this.state = {
                 expData: null,
                 nodeGroupData: {}
-            };
+            };            
             this.expLoc = '/expinfo_a/'+this.props.match.params.id;
             this.subscribeToNode.bind(this);
         }
@@ -57,4 +57,34 @@ const withExpInfo = (Component) => {
     return WithExpInfo;
 }
 
+const withExpInfoHist = (Component) => {
+    class WithExpInfoHist extends React.Component {
+        constructor(props) {
+            super(props);
+            this.nomatch = false;
+            this.state = {
+                expData: null,
+                agcData: {}
+            };
+            if(!this.props.match.params.id){
+                this.nomatch = true;
+            }
+            this.agcData = {};
+        }
+        componentWillMount() {
+            firebase.db.ref('/exp_hist/'+this.props.match.params.id).once('value', (snapshot) => {
+                this.setState({
+                    expData:snapshot.val()
+                });
+            });
+
+        }
+        render(){
+            return <Component expData={this.state.expData} match={this.props.match} />
+        }
+    }
+    return WithExpInfoHist;
+}
+
 export default withExpInfo;
+export {withExpInfoHist};

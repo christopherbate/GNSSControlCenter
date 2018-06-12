@@ -3,18 +3,17 @@ import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { Grid, Row, Col } from 'react-bootstrap';
 
 import Navigation from './Navigation';
-import LandingPage from './LandingPage';
-import SignUpPage from './SignupPage';
-import LoginPage from './LoginPage';
+import LandingPage from './pages/LandingPage';
+import SignUpPage from './pages/SignupPage';
+import LoginPage from './pages/LoginPage';
 import * as routes from '../constants/routes';
-import ExpHistory from './ExpHistory';
-import ExpDetail from './ExpDetail';
+import ExpHistList from './history/ExpHistList';
+import ExpHistDetail from './history/ExpHistDetail';
 import Localize from './Localization';
 import Experiments from './Experiments';
 import ExpControl from './ExpControl';
 import NodeStatus from './NodeStatus';
-import withAuthentication from './withAuthentication';
-import NodeControl from './NodeControl';
+import withAuthentication from './HOCs/withAuthentication';
 
 const App = () => (
   <Router>
@@ -45,7 +44,7 @@ const App = () => (
           />
           <Route
             exact path={routes.HISTORY}
-            component={() => <ExpHistory />}
+            component={() => <ExpHistList />}
           />
           <Route 
             exact path={routes.LOCALIZE}
@@ -53,7 +52,7 @@ const App = () => (
           />
           <Route
             path={routes.HISTORY_DETAIL}
-            render={(props) => <ExpDetail {...props} />}
+            render={(props) => <ExpHistDetail {...props} />}
           />
           <Route
             path={routes.EXP_CONTROL}
@@ -62,10 +61,6 @@ const App = () => (
           <Route
             exact path={routes.NODE_STATUS}
             render={(props)=><NodeStatus {...props} /> }
-          />
-          <Route
-            path = {routes.NODE_CONTROL}
-            render={(props)=> <NodeControl {...props} /> }
           />
           <Route
             exact path={routes.EXP}

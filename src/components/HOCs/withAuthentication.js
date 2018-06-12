@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {firebase} from '../firebase/index';
+import {firebase} from '../../firebase/index';
 
 const withAuthentication = (Component) => {
     class WithAuthentication extends React.Component {

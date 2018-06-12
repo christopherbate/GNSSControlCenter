@@ -1,11 +1,12 @@
 import React from 'react';
 import {Grid,Row,Col} from 'react-bootstrap';
-import withAuthorization from './withAuthorization';
 import {Panel} from 'react-bootstrap';
-import {firebase} from '../firebase/index';
+import {firebase} from '../../firebase/index';
 import {Link} from 'react-router-dom';
 
-class ExpHistory extends React.Component {;
+import withAuthorization from '../HOCs/withAuthorization';
+
+class ExpHistList extends React.Component {;
     constructor(props)
     {
         super(props);
@@ -17,7 +18,7 @@ class ExpHistory extends React.Component {;
 
     componentWillMount()
     {
-        let expRef = firebase.db.ref('/expinfo').orderByChild("start_time").limitToLast(30);
+        let expRef = firebase.db.ref('/exp_hist').orderByChild("start_time").limitToLast(30);
 
         expRef.on('child_added', (snapshot) => {
             this.expList[snapshot.key] = snapshot.val();
@@ -56,4 +57,4 @@ class ExpHistory extends React.Component {;
 };
 
 const authCondition = (authUser) => !!authUser;
-export default withAuthorization(authCondition)(ExpHistory);
+export default withAuthorization(authCondition)(ExpHistList);

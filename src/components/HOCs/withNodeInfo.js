@@ -1,7 +1,7 @@
 import React from 'react';
 import {withRouter} from 'react-router-dom';
 
-import {firebase} from '../firebase/index';
+import {firebase} from '../../firebase/index';
 
 const withNodeInfo = (Component) => {
     class WithNodeInfo extends React.Component {

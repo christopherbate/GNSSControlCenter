@@ -2,10 +2,19 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import * as routes from '../constants/routes';
-import LogoutButton from './Logout';
-
+import {auth} from '../firebase/index';
 import {Navbar,Nav,NavItem} from 'react-bootstrap';
 import {LinkContainer} from 'react-router-bootstrap';
+
+class LogoutButton extends React.Component {
+  render () {
+      return (
+          <p onClick={auth.fbLogout}>
+              Logout
+          </p>
+      );
+  }
+}
 
 const AuthdLinks = () => (
   <Nav>
