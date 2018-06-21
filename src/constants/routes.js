@@ -1,7 +1,6 @@
 export const SIGN_UP = '/signup';
 export const SIGN_IN = '/signin';
 export const LANDING = '/';
-export const HOME = '/home';
 export const LOCALIZE = '/localize';
 export const NODE_STATUS = '/nodes';
 export const EXP ='/experiments';
@@ -10,3 +9,4 @@ export const HISTORY = '/history';
 export const HISTORY_DETAIL = '/history/:id';
 export const EXP_CONTROL = '/experiments/:id';
 export const EXP_LIST ='/experiments/list';
+export const SYSTEM = '/system';

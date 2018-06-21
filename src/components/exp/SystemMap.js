@@ -1,5 +1,5 @@
 import React from 'react';
-import * as routes from '../constants/routes';
+import * as routes from '../../constants/routes';
 //import mapboxgl from 'mapbox-gl/dist/mapbox-gl';
 import ReactMapboxGl, { Layer, Feature, Marker } from 'react-mapbox-gl';
 

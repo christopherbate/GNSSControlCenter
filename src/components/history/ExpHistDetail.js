@@ -25,7 +25,7 @@ class ExpHistDetail extends Component {
                     <Row>
                         {
                             this.props.expData ?
-                                (<AGCHistPlots dataLimit={120} nodeList={this.props.expData.agcplots} />) :
+                                (<AGCHistPlots dataLimit={-1} nodeList={this.props.expData.agcplots} />) :
                                 null
                         }
                     </Row>

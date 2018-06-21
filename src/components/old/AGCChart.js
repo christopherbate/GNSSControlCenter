@@ -1,5 +1,5 @@
 import React from 'react';
-import { VictoryLine, VictoryChart, VictoryLegend, VictoryZoomContainer, VictoryBrushContainer, VictoryAxis} from 'victory';
+import { VictoryLine, VictoryChart, VictoryLegend, VictoryZoomContainer, VictoryBrushContainer} from 'victory';
 import { firebase } from '../../firebase/index';
 
 const reducer = (accumulator, currentValue) => ({ ch1: accumulator.ch1 + currentValue.ch1 });
@@ -9,17 +9,20 @@ class AGCChart extends React.Component {
         super(props);
         this.data = [];
         console.log(this.props.streamKey);
+
         this.state = {
             data: [],
             agcAvg: 0,
             zoomDomain: {x: [new Date(2018,1,1), new Date(2019,1,1)]}
         };
+
         this.movingAvg = {
             ch1: 0,
             ch2: 0,
             ch3: 0,
             ch4: 0
         };
+
         this.refLocation = null;
     }
     handleZoom(domain){
@@ -27,22 +30,36 @@ class AGCChart extends React.Component {
     }
     componentWillMount() {
         this.refLocation = '/agcdata/' + this.props.streamKey;
+
         var limit = this.props.dataLimit > 0 ? this.props.dataLimit : 99999;
+
         firebase.db.ref('/agcdata/' + this.props.streamKey).limitToLast(limit).on('child_added', (snap) => {
-            this.data.push({
-                x: new Date(snap.key * 1000), 
-                ch1: snap.val().ch0,
-                ch2: snap.val().ch1, 
-                ch3: snap.val().ch2,
-                ch4: snap.val().ch3
-            });
-            if(this.data.length>0){
-                this.movingAvg = this.data.reduce(reducer);
-                this.movingAvg.ch1 = this.movingAvg.ch1 / this.data.length;
-            } else {
-                this.movingAvg = this.data.reduce(reducer, 0);
-            }
-            this.setState({data: this.data, agcAvg: this.movingAvg });
+            if(snap.val()){
+                /*this.data.push({
+                    x: new Date(snap.key * 1000), 
+                    ch1: snap.val().ch0,
+                    ch2: snap.val().ch1, 
+                    ch3: snap.val().ch2,
+                    ch4: snap.val().ch3
+                });
+                if(this.data.length>0){
+                    this.movingAvg = this.data.reduce(reducer);
+                    this.movingAvg.ch1 = this.movingAvg.ch1 / this.data.length;
+                } else {
+                    this.movingAvg = this.data.reduce(reducer, 0);
+                }*/
+                /*this.setState({data: this.data, agcAvg: this.movingAvg });*/
+                this.setState(function(prevState,props) {
+                    
+                    return {data: prevState.data.concat({
+                        x: new Date(snap.key*1000),
+                        ch1: snap.val().ch0,
+                        ch2: snap.val().ch1,
+                        ch3: snap.val().ch2,
+                        ch4: snap.val().ch3
+                    })};
+                });
+            }           
         });
     }
 
@@ -51,6 +68,7 @@ class AGCChart extends React.Component {
             firebase.db.ref(this.refLocation).off();
         }
     }
+
     render() {
         return (
             <div>
@@ -64,9 +82,6 @@ class AGCChart extends React.Component {
                             onZoomDomainChange = {this.handleZoom.bind(this)}
                         />
                     }>
-                    <VictoryAxis
-                        tickFormat={(x) => new Date(x).getTime()}
-                    />
                     <VictoryLegend x={0} y={0}
                         orientation="horizontal"
                         gutter={20}

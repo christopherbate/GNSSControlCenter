@@ -46,7 +46,7 @@ class SignUpForm extends Component {
       password: '',
       error: null} );
 
-      this.props.history.push(routes.HOME);
+      this.props.history.push(routes.NODE_STATUS);
     }).catch( error => {
       this.setState({'error': error});
     });

@@ -21,7 +21,8 @@ const AuthdLinks = () => (
     <LinkContainer to={routes.EXP}><NavItem>Experiments</NavItem></LinkContainer>
     <LinkContainer to={routes.NODE_STATUS}><NavItem>Nodes</NavItem></LinkContainer>
     <LinkContainer to={routes.HISTORY}><NavItem>History</NavItem></LinkContainer>
-    <LinkContainer to={routes.LOCALIZE}><NavItem>Localize</NavItem></LinkContainer>    
+    <LinkContainer to={routes.LOCALIZE}><NavItem>Localize</NavItem></LinkContainer>  
+    <LinkContainer to={routes.SYSTEM}><NavItem>System Info</NavItem></LinkContainer>  
     <NavItem><LogoutButton /></NavItem>
   </Nav>
 );
@@ -37,7 +38,7 @@ const Header = (props, {authUser}) => (
   <Navbar>
             <Navbar.Header> 
               <Navbar.Brand>
-                <Link to={routes.HOME}>GNSS Control Center</Link>
+                <Link to={routes.NODE_STATUS}>GNSS Control Center</Link>
               </Navbar.Brand>
             </Navbar.Header>
            { authUser ? <AuthdLinks /> : <NonAuthdLinks /> }

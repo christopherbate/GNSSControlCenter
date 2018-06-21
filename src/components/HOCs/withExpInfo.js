@@ -52,7 +52,6 @@ const withExpInfo = (Component) => {
             return <Component expData={this.state.expData} nodeGroupData={this.state.nodeGroupData} match={this.props.match} />;
         }
     }
-
    
     return WithExpInfo;
 }
@@ -77,7 +76,6 @@ const withExpInfoHist = (Component) => {
                     expData:snapshot.val()
                 });
             });
-
         }
         render(){
             return <Component expData={this.state.expData} match={this.props.match} />

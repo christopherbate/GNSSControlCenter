@@ -11,7 +11,7 @@ class NewExpForm extends Component {
             selectedNodeList: {},
             expSetupName: '',
             successShow: false,
-            expKey: ''
+            expKey: '',
         };
         this.postCommand.bind(this);
     }
@@ -33,8 +33,9 @@ class NewExpForm extends Component {
         var settings = {
             'expname': this.state.expSetupName,
             'owner': firebase.auth.currentUser.email,
-            'selectedNodeList': {}
-        }
+            'selectedNodeList': {},
+            'trackIF': false
+        };
 
         // Add node members.
         Object.keys(this.state.selectedNodeList).map((nodeName, index) => {
@@ -94,7 +95,7 @@ class NewExpForm extends Component {
                                             </td>
                                             <td>
                                                 {
-                                                    !this.props.nodeList[nodeName].group ?
+                                                    !this.props.nodeList[nodeName].exp ?
                                                         <Checkbox onClick={this.onSelectNode.bind(this)} value={nodeName} />
                                                         : <Label bsStyle="warning">Occupied</Label>
                                                 }
@@ -133,10 +134,10 @@ class NewExpForm extends Component {
                 </form>
                 <Modal show={this.state.successShow} onHide={() => (this.setState({ successShow: false }))} >
                     <Modal.Header>
-                        <Modal.Title>Successfully Setup Experiment</Modal.Title>
+                        <Modal.Title>Creation Request Submitted</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                        <Link to={"/experiments/list"}><Button bsStyle="primary">Go To Experiment Control Page</Button></Link>
+                        <Link to={"/experiments/"}><Button bsStyle="primary" onClick={()=>(this.setState({successShow:false}))}>OK</Button></Link>
                     </Modal.Body>
                 </Modal>
             </div>

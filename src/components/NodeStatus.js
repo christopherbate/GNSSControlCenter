@@ -4,6 +4,7 @@ import withNodeInfo from './HOCs/withNodeInfo';
 import withAuthorization from './HOCs/withAuthorization';
 import { firebase } from '../firebase/index';
 import ErrorList from './ErrorList';
+import AGCData from './AGCData';
 
 function getTimeString(uptime) {
     var days = Math.floor(uptime / (24 * 3600));
@@ -42,8 +43,10 @@ class NodeStatus extends Component {
         });
     }
     render() {
+        const timeOpt = {timeZone: 'America/Denver',hour:'numeric',minute:'numeric', hour12: false, day:'numeric',month:'numeric', seconds:'numeric'};
+        const tickFormatter = (tick) => (new Date(tick)).toLocaleString('en-US',timeOpt);
         return (
-            <Tabs activeKey={this.state.activeKey} onSelect={(key) => (this.setState({ activeKey: key }))}>
+            <Tabs activeKey={this.state.activeKey} id="node-status-tabs" onSelect={(key) => (this.setState({ activeKey: key }))}>
                 <br />
                 <Tab title="Overview" eventKey={1}>
                     <Grid>
@@ -56,12 +59,14 @@ class NodeStatus extends Component {
                                                 <th>Node</th>
                                                 <th>HW Status</th>
                                                 <th>SW Status</th>
+                                                <th>SW Ver.</th>
                                                 <th>Control</th>
                                                 <th>Owner</th>
                                                 <th>Exp.</th>
                                                 <th>Uptime</th>
-                                                <th>Errors</th>
-                                                <th>Space Utilization</th>
+                                                <th>Time On Board</th>
+                                                <th>Errors</th>                                
+                                                <th>Space Utilization</th>                                 
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -86,14 +91,21 @@ class NodeStatus extends Component {
                                                             }
                                                         </td>
                                                         <td>
+                                                            {
+                                                                !!this.props.nodeList[nodeName].loggerVersion ?
+                                                                (<p>{this.props.nodeList[nodeName].loggerVersion}</p>):
+                                                                null
+                                                            }
+                                                        </td>
+                                                        <td>
                                                             <Button bsStyle="success" value={nodeName} onClick={this.swRestartCmd}>SW Restart</Button>
                                                             <Button bsStyle="danger" value={nodeName} onClick={this.clearSpace}>Erase Data</Button>
                                                             <Button bsStyle="danger" value={nodeName} onClick={this.hwRestartCmd}>HW Reboot</Button>
                                                         </td>
                                                         <td>
                                                             {
-                                                                !!this.props.nodeList[nodeName].group ?
-                                                                    (<Label bsStyle="warning">{this.props.nodeList[nodeName].group}</Label>)
+                                                                !!this.props.nodeList[nodeName].exp ?
+                                                                    (<Label bsStyle="warning">{this.props.nodeList[nodeName].exp}</Label>)
                                                                     : (<Label bsStyle="success">Not Assigned</Label>)
                                                             }
                                                         </td>
@@ -103,6 +115,12 @@ class NodeStatus extends Component {
                                                             {
                                                                 !!this.props.nodeList[nodeName].uptime ?
                                                                     (<Label>{getTimeString(this.props.nodeList[nodeName].uptime)}</Label>) : null
+                                                            }
+                                                        </td>
+                                                        <td>
+                                                            {
+                                                                !!this.props.nodeList[nodeName].local_time ? 
+                                                                    (<Label bsStyle="success">{this.props.nodeList[nodeName].local_time}</Label>):null
                                                             }
                                                         </td>
                                                         <td>
@@ -118,7 +136,7 @@ class NodeStatus extends Component {
                                                                     (<ProgressBar now={100 - (this.props.nodeList[nodeName].free_space / 250000) * 100} />) :
                                                                     (<p>Unknown</p>)
                                                             }
-                                                        </td>
+                                                        </td>                                                
                                                     </tr>
                                                 ))
                                             }
@@ -129,20 +147,24 @@ class NodeStatus extends Component {
                         </Row>
                     </Grid>
                 </Tab>
-                <Tab title="Messages" eventKey={2}>
+                <Tab title="Error Messages" eventKey={2}>
                     <br />
                     {
                         Object.keys(this.props.nodeList).map( (nodeName,index) =>(
                             <div key={index}>
                                 <h3>{nodeName}</h3>
                                 {
-                                  this.props.nodeList[nodeName].errcnt !== 0 ?
+                                  !!this.props.nodeList[nodeName].errors ?
                                  (<ErrorList errorList={this.props.nodeList[nodeName].errors}/>) :
                                  (<p>No Error Messages</p>)
                                 }
                             </div>
                         ))
                     }
+                </Tab>
+                <Tab  title="AGC Data" eventKey={3}>
+                    <br />
+                    <AGCData nodeList={this.props.nodeList} />
                 </Tab>
             </Tabs>
         );

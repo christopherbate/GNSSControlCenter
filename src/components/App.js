@@ -11,7 +11,8 @@ import ExpHistList from './history/ExpHistList';
 import ExpHistDetail from './history/ExpHistDetail';
 import Localize from './Localization';
 import Experiments from './Experiments';
-import ExpControl from './ExpControl';
+import SystemInfo from './System';
+import ExpControl from './exp/ExpControl';
 import NodeStatus from './NodeStatus';
 import withAuthentication from './HOCs/withAuthentication';
 
@@ -65,6 +66,10 @@ const App = () => (
           <Route
             exact path={routes.EXP}
             render={()=><Experiments />}
+          />
+          <Route
+            exact path={routes.SYSTEM}
+            render={()=><SystemInfo />}
           />
         </Col>
       </Row>

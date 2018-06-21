@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {Button} from 'react-bootstrap';
-import {firebase} from '../firebase/index';
+import {firebase} from '../../firebase/index';
 import {Grid, Row, Col, Modal, Radio} from 'react-bootstrap';
 import {Link} from 'react-router-dom';
 import {FormGroup,Checkbox,FormControl,ControlLabel, Form} from 'react-bootstrap';
@@ -99,7 +99,7 @@ class ControlBlock extends Component {
         });
 
         // Tell the nodes to start logging.        
-        this.postCommand('startexp', this.props.expData.expname);
+        // this.postCommand('startexp', this.props.expData.expname);
 
         // Update the new experiment ref.
         firebase.db.ref('/expinfo_a/'+this.props.expKey).update({
@@ -176,7 +176,7 @@ class ControlBlock extends Component {
                     <Col xs={6}>
                         <Button bsStyle="primary" onClick={this.onClickUpdate.bind(this)} disabled={!(this.props.controlState==="ARMED")} >Get Assisted Position Update</Button>
                         <Button bsStyle="primary" onClick={this.onClickEphemeris.bind(this)} disabled={!(this.props.controlState==="ARMED"||this.props.controlState==="STARTED")}>Get Ephemeris Update</Button>
-                        <Button bsStyle="primary" onClick={this.onClickStart.bind(this)} disabled={!(this.props.controlState==="SETUP")}>Start Experiment</Button>
+                        <Button bsStyle="primary" onClick={this.onClickStart.bind(this)} disabled={!(this.props.controlState==="SETUP")}>Start AGC Tracking</Button>
                         <Button bsStyle="primary" onClick={this.onClickStopExp.bind(this)} disabled={(this.props.controlState==="SETUP")}>Pause Experiment</Button>
                         <Button bsStyle="primary" onClick={this.onClickSpec.bind(this)} disabled={false}>Get Spectrum Plots</Button>                                             
                     </Col>

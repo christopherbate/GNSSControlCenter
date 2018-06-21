@@ -2,7 +2,7 @@ import React from 'react';
 import { Grid, Panel, Row, Col, Image } from 'react-bootstrap';
 import { firebase } from '../../firebase/index';
 
-import AGCChart from './AGCChart';
+import AGCChart_rechart from './AGCChart_rechart';
 
 class SpecPlot extends React.Component {
     constructor(props) {
@@ -42,21 +42,22 @@ class AGCPlots extends React.Component {
                 <Row>
                     {
                         this.props.nodeList ?
+
                             Object.keys(this.props.nodeList).map((nodeName, index) => (
                                 <Col md={12} xs={12} key={index}>
                                     <Panel>
                                         <Panel.Heading>AGC Data - {nodeName}</Panel.Heading>
                                         <Panel.Body>
-                                            { 
-                                                !!this.props.nodeList[nodeName] ? 
-                                                ( <AGCChart key={index} dataLimit={this.props.dataLimit} streamKey={this.props.nodeList[nodeName].streamKey} /> ) 
-                                                : (null)  
-                                            }                                            
-                                            { 
-                                                this.props.nodeList[nodeName].specKey ? 
-                                                ( <SpecPlot gsloc={this.props.nodeList[nodeName].specKey} />) : 
-                                                (null)
-                                            }                                                                                                                                
+                                            {
+                                                !!this.props.nodeList[nodeName].streamKey ?
+                                                    (<AGCChart_rechart key={index} dataLimit={this.props.dataLimit} streamKey={this.props.nodeList[nodeName].streamKey} />)
+                                                    : (null)
+                                            }
+                                            {
+                                                this.props.nodeList[nodeName].specKey ?
+                                                    (<SpecPlot gsloc={this.props.nodeList[nodeName].specKey} />) :
+                                                    (null)
+                                            }
                                         </Panel.Body>
                                     </Panel>
                                 </Col>
